@@ -29,8 +29,8 @@ public class gameTetris extends Frame{
 		
 		func = new functionArea();
 		
-		add(new mainArea());
 		add(func);
+//		add(new mainArea());
 		show();
 	}
 
@@ -77,7 +77,8 @@ class functionArea extends Panel{
 		pixelSize = Math.max(rWidth/maxX, rHeight/maxY);
 		centerX = maxX/2;
 		centerY = maxY/2;
-		width = rWidth/4; height = width*3;
+		width = rWidth*3/5;
+		height = 2 * width;
 	}
 	
 	int iX(float x){return Math.round(centerX + x/pixelSize);}
@@ -87,7 +88,7 @@ class functionArea extends Panel{
 		initial();
 		this.setSize(Math.round(width/pixelSize) , Math.round(height/pixelSize));
 		this.setLocation(iX(rWidth/5), iY(rHeight*ris/2 - rWidth*0.1F));
-		this.setLayout(new GridLayout(4,2,5,5));
+		this.setLayout(null);
 		level = new Label("Level: ");
 		level_data = new Label("1");
 		line = new Label("Lines: ");
@@ -102,6 +103,14 @@ class functionArea extends Panel{
 		this.add(line_data);
 		this.add(score);
 		this.add(score_data);
-		this.add(quit);
+//		this.add(quit);
+		
+		level.setBounds(320,15,30,20);
+		level_data.setBounds(320,45,30,20);
+		line.setBounds(320,75,30,20);
+		line_data.setBounds(320,105,30,20);
+		score.setBounds(320,135,30,20);
+//		score_data.setBounds(iX(rWidth/5), iY(rHeight*ris/2), Math.round(width/pixelSize) , Math.round(height/pixelSize));
+		
 	}
 }
