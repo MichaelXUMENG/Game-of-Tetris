@@ -39,6 +39,7 @@ public class gameTetris extends Frame{
  * All the elements must be put in the same layer
  * ****************************************/
 class mainArea extends Panel implements MouseListener, ActionListener{
+
 	
 	//declare the button and labels
 	public Button quit; 
@@ -55,7 +56,10 @@ class mainArea extends Panel implements MouseListener, ActionListener{
 	int[][] sqPositionY = new int[20][10];
 
 	drawElements dE = new drawElements( );
-	
+
+
+
+
 	void initial(){
 		Dimension d = this.getSize();
 		int maxX = d.width - 1, maxY = d.height - 1;
@@ -309,4 +313,4 @@ class drawElements{
 		lg.setColor(Color.black);
 		lg.drawString(s, Px, Py);
 	}
-}
+} 
