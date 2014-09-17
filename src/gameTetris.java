@@ -38,7 +38,7 @@ public class gameTetris extends Frame{
  * To show the mainArea with the painting area and labels and buttons together,
  * All the elements must be put in the same layer
  * ****************************************/
-class mainArea extends Panel implements MouseListener, ActionListener{
+class mainArea extends Panel implements MouseMotionListener, ActionListener{
 
 	
 	//declare the button and labels
@@ -103,13 +103,12 @@ class mainArea extends Panel implements MouseListener, ActionListener{
 		this.add(score_data);
 		this.add(quit);
 		
-		this.addMouseListener(this);
+		this.addMouseMotionListener(this);
 	}
 	
 	public void paint(Graphics g){
 		super.paint(g);
 		initial();
-		dE.setG(g);
 		g.setColor(Color.white);
 		
 		//create the big white area
@@ -169,13 +168,8 @@ class mainArea extends Panel implements MouseListener, ActionListener{
 		dE.drawZShape(g, Es, sqPositionX[19][5], sqPositionY[19][5]);
 		dE.drawCube(g, Es, sqPositionX[5][5], sqPositionY[5][5]);
 		dE.drawLine(g, Es, sqPositionX[10][5], sqPositionY[10][5]);
-//		drawS(g,sqPositionX[13][5], sqPositionY[13][5], "This is MENG");
 	}
 	
-	void drawS(Graphics g, int Px, int Py, String s){
-		g.setColor(Color.black);
-		g.drawString(s, Px, Py);
-	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -187,52 +181,46 @@ class mainArea extends Panel implements MouseListener, ActionListener{
 	}
 
 	@Override
-	public void mousePressed(MouseEvent e) {
+	public void mouseDragged(MouseEvent e) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
+	public void mouseMoved(MouseEvent e) {
 		// TODO Auto-generated method stub
 		int Mx, My;
+		boolean inside = false;
 		Mx = e.getX();
 		My = e.getY();
 		
 		Graphics g = getGraphics();
-		if(Mx>=sqPositionX[0][0] & Mx<=sqPositionX[19][9]){
-			if(My>=sqPositionY[0][0] & My<=sqPositionY[19][9]){
-				drawS(g, sqPositionX[13][5], sqPositionY[13][5], "This is MENG");
+		if(Mx>=sqPositionX[0][0] & Mx<=sqPositionX[19][9]+Es){
+			if(My>=sqPositionY[0][0] & My<=sqPositionY[19][9]+Es){
+				if(!inside){
+					inside = true;
+					dE.drawString(g, sqPositionX[7][2], sqPositionY[7][2], "PAUSE");
+				}
+			}
+			else{
+				if(!inside){
+					inside = false;
+//					dE.clearSring(g, sqPositionX[7][2], sqPositionY[7][2], "PAUSE");
+					repaint();
+				}
 			}
 		}
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
+		else{
+			if(!inside){
+				inside = false;
+//				dE.clearSring(g, sqPositionX[7][2], sqPositionY[7][2], "PAUSE");
+				repaint();
+			}
+		}
 		
 	}
 
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
-		int Mx, My;
-		Mx = e.getX();
-		My = e.getY();
-		
-		Graphics g = getGraphics();
-		if(Mx>=sqPositionX[0][0] & Mx<=sqPositionX[19][9]){
-			if(My>=sqPositionY[0][0] & My<=sqPositionY[19][9]){
-				drawS(g, sqPositionX[13][5], sqPositionY[13][5], "This is MENG");
-			}
-		}
-	}
+	
 	
 	
 }
@@ -244,11 +232,6 @@ class mainArea extends Panel implements MouseListener, ActionListener{
  * ***************************************/
 class drawElements{
 
-	Graphics lg = null;
-
-	void setG(Graphics og){
-		lg = og;
-	}
 	
 	void drawLine(Graphics g, int size, int Px, int Py){
 		g.setColor(Color.black);
@@ -310,7 +293,17 @@ class drawElements{
 	}
 	
 	void drawString(Graphics g, int Px, int Py, String s){
-		lg.setColor(Color.black);
-		lg.drawString(s, Px, Py);
+		g.setColor(Color.black);
+		g.drawRect(Px, Py, 215, 65);
+		g.setFont(new Font("Times New Romen", Font.BOLD, 60));
+		g.drawString(s, Px+10, Py+55);
+	}
+	
+	void clearSring(Graphics g, int Px, int Py, String s){
+		g.setColor(Color.white);
+		g.drawRect(Px, Py, 215, 65);
+		g.setFont(new Font("Times New Romen", Font.BOLD, 60));
+		g.drawString(s, Px+10, Py+55);
+		
 	}
 } 
