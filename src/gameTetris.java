@@ -3,45 +3,39 @@ import java.awt.event.*;
 import java.util.Random;
 
 
-public class gameTetris extends Frame implements MouseListener{
+public class gameTetris extends Panel implements MouseMotionListener, ActionListener,MouseListener{
 
-	int current, next;
-	boolean start = true;
-	boolean round = false;
-	mainArea mA;
+	static int current;
+	static int next;
+	static boolean start = true;
+	static boolean round = false;
+	
+	//declare the button and labels
+		public Button quit; 
+		public Label level, line, score, level_data, line_data, score_data;
+		
+		//declare the variables used to calculate the coordinates
+		int centerX, centerY; // the central pixel's position
+		float pixelSize, width, height, //width and height is the logical width and height of my elements
+		rWidth = 100.0F, rHeight = 130.0F,     //used to calculate the pixel size
+				sqSize; //logical size of a square
+		
+		int PX, PY, SX, SY, Es; //the actual position of pixel: PX,PY are position; SX,SY are actual size, and Es is the actual size of a square.
+		int[][] sqPositionX = new int[20][10];
+		int[][] sqPositionY = new int[20][10];
+
+		drawElements dE = new drawElements( );
+		
+		int row = 0, collum = 3;
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		new gameTetris();
-	}
-	
-	gameTetris(){
-		super("Game of Tetris");
-		mA = new mainArea();
-		//add the close window action
-		addWindowListener(new WindowAdapter()
-		   {public void windowClosing(WindowEvent e){System.exit(0);}});
 		
-		Dimension screenSize = 
-				Toolkit.getDefaultToolkit().getScreenSize();
-		int screenWidth = screenSize.width;
-		int screenHeight = screenSize.height;
-		
-		int x = screenWidth/8;
-		int y = screenHeight/16;
-		
-		setSize(screenWidth*3/7,screenHeight*6/8);
-		this.setLocation(x, y);
-		
-		
-		add(mA);
-		this.setVisible(true);
-		this.addMouseListener(this);
-
 		next = new Random().nextInt(6);
 		current = next;
 		
-		while(true){
+/*		while(true){
 			while(start){
 				current = next;
 				next = new Random().nextInt(6);
@@ -55,81 +49,11 @@ public class gameTetris extends Frame implements MouseListener{
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-				}
+				} 
 			}
-		}
-		
+		}*/
 	}
-
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
-		if(e.getButton() == e.BUTTON1){
-			mA.leftClick();
-		}
-		
-		else if(e.getButton() == e.BUTTON3){
-			mA.rightClick();
-		}
-	}
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-}
-
-/************
- * To show the mainArea with the painting area and labels and buttons together,
- * All the elements must be put in the same layer
- * ****************************************/
-class mainArea extends Panel implements MouseMotionListener, ActionListener, MouseListener{
-
 	
-	//declare the button and labels
-	public Button quit; 
-	public Label level, line, score, level_data, line_data, score_data;
-	
-	//declare the variables used to calculate the coordinates
-	int centerX, centerY; // the central pixel's position
-	float pixelSize, width, height, //width and height is the logical width and height of my elements
-	rWidth = 100.0F, rHeight = 130.0F,     //used to calculate the pixel size
-			sqSize; //logical size of a square
-	
-	int PX, PY, SX, SY, Es; //the actual position of pixel: PX,PY are position; SX,SY are actual size, and Es is the actual size of a square.
-	int[][] sqPositionX = new int[20][10];
-	int[][] sqPositionY = new int[20][10];
-
-	drawElements dE = new drawElements( );
-	
-	int current, next;
-	boolean start = true;
-	boolean round = true;
-	int row = 0, collum = 3;
-
-
-
 	void initial(){
 		Dimension d = this.getSize();
 		int maxX = d.width - 1, maxY = d.height - 1;
@@ -146,7 +70,23 @@ class mainArea extends Panel implements MouseMotionListener, ActionListener, Mou
 	int iX(float x){return Math.round(centerX + x/pixelSize);}
 	int iY(float y){return Math.round(centerY - y/pixelSize);}
 	
-	mainArea(){
+	
+	gameTetris(){
+//		super("Game of Tetris");
+		//add the close window action
+//		addWindowListener(new WindowAdapter()
+//		   {public void windowClosing(WindowEvent e){System.exit(0);}});
+		
+		Dimension screenSize = 
+				Toolkit.getDefaultToolkit().getScreenSize();
+		int screenWidth = screenSize.width;
+		int screenHeight = screenSize.height;
+		
+		int x = screenWidth/8;
+		int y = screenHeight/16;
+		
+		setSize(screenWidth*3/7,screenHeight*6/8);
+		this.setLocation(x, y);
 		this.setLayout(null);
 		
 		//label 1 show the level of game
@@ -174,12 +114,13 @@ class mainArea extends Panel implements MouseMotionListener, ActionListener, Mou
 		this.add(quit);
 		
 		this.addMouseMotionListener(this);
-//		this.addMouseListener(this);
 		
 		
-
+		this.setVisible(true);
+		this.addMouseListener(this);	
+		
 	}
-	
+
 	
 	public void paint(Graphics g){
 		super.paint(g);
@@ -301,13 +242,46 @@ class mainArea extends Panel implements MouseMotionListener, ActionListener, Mou
 		}
 	}
 	
+	/*********************************
+	 * These are the movement
+	 * ***********************************************************/
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		if(e.getButton() == e.BUTTON1){
+		}
+		
+		else if(e.getButton() == e.BUTTON3){
+		}
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
-		if(e.getSource()==quit){
-			System.exit(0);
-		}
 		
 	}
 
@@ -349,48 +323,6 @@ class mainArea extends Panel implements MouseMotionListener, ActionListener, Mou
 		
 	}
 	
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
-		if(e.getButton() == e.BUTTON1){
-			if(dE.getLeft()>sqPositionX[0][0]){
-				collum--;
-				repaint();
-			}
-		}
-		
-		else if(e.getButton() == e.BUTTON3){
-			if(dE.getRight() < sqPositionX[0][9]){
-				collum++;
-				repaint();
-			}
-		}
-	}
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 	
 	/**************************************************
 	 * Here are some functions that will be used by mainArea
@@ -418,6 +350,8 @@ class mainArea extends Panel implements MouseMotionListener, ActionListener, Mou
 		this.current = big;
 		this.next = small;
 	}
+
+
 }
 
 
