@@ -5,53 +5,83 @@ import java.util.Random;
 
 public class gameTetris extends Panel implements MouseMotionListener, ActionListener,MouseListener{
 
-	static int current;
-	static int next;
+	static int current, next;
 	static boolean start = true;
 	static boolean round = false;
 	
 	//declare the button and labels
-		public Button quit; 
-		public Label level, line, score, level_data, line_data, score_data;
+	static public Button quit; 
+	static public Label level, line, score, level_data, line_data, score_data;
+	
+	static Frame outFrame = new Frame();
 		
-		//declare the variables used to calculate the coordinates
-		int centerX, centerY; // the central pixel's position
-		float pixelSize, width, height, //width and height is the logical width and height of my elements
-		rWidth = 100.0F, rHeight = 130.0F,     //used to calculate the pixel size
-				sqSize; //logical size of a square
+	//declare the variables used to calculate the coordinates
+	static int centerX, centerY; // the central pixel's position
+	static float pixelSize, width, height, //width and height is the logical width and height of my elements
+	rWidth = 100.0F, rHeight = 130.0F,     //used to calculate the pixel size
+			sqSize; //logical size of a square
 		
-		int PX, PY, SX, SY, Es; //the actual position of pixel: PX,PY are position; SX,SY are actual size, and Es is the actual size of a square.
-		int[][] sqPositionX = new int[20][10];
-		int[][] sqPositionY = new int[20][10];
+	static int PX, PY, SX, SY, Es; //the actual position of pixel: PX,PY are position; SX,SY are actual size, and Es is the actual size of a square.
+	static int[][] sqPositionX = new int[20][10];
+	static int[][] sqPositionY = new int[20][10];
 
-		drawElements dE = new drawElements( );
+	static drawElements dE = new drawElements( );
 		
-		int row = 0, collum = 3;
+	static int row = 0, collum = 3;
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		new gameTetris();
+		gameTetris gT = new gameTetris();
+		
+		Dimension screenSize = 
+				Toolkit.getDefaultToolkit().getScreenSize();
+		int screenWidth = screenSize.width;
+		int screenHeight = screenSize.height;
+		
+		int x = screenWidth/8;
+		int y = screenHeight/16;
+		
+		
+		outFrame.setTitle("Game of Tetris");
+		//add the close window action
+		outFrame.addWindowListener(new WindowAdapter()
+				   {public void windowClosing(WindowEvent e){System.exit(0);}});
+		outFrame.setSize(screenWidth*3/7,screenHeight*6/8);
+		outFrame.setLocation(x, y);
+		
+		outFrame.add(gT);
+		
+		outFrame.setResizable(true);
+		outFrame.setVisible(true);
+		
 		
 		next = new Random().nextInt(6);
 		current = next;
 		
-/*		while(true){
+		while(true){
 			while(start){
+				row = 0;
 				current = next;
-				next = new Random().nextInt(6);
-				mA.setShapes(current, next);
+				next = new Random().nextInt(7);
+				gT.repaint();
 				round = true;
 				while(round){
 					try {
-						mA.fallDown();
 						Thread.sleep(1000);
+						if(dE.getBottom() == sqPositionY[19][0]){
+							break;
+						}
+						row++;
+						gT.repaint();
+						
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+					
 				} 
 			}
-		}*/
+		}
 	}
 	
 	void initial(){
@@ -71,35 +101,27 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 	int iY(float y){return Math.round(centerY - y/pixelSize);}
 	
 	
-	gameTetris(){
-//		super("Game of Tetris");
-		//add the close window action
-//		addWindowListener(new WindowAdapter()
-//		   {public void windowClosing(WindowEvent e){System.exit(0);}});
+	gameTetris(){		
 		
-		Dimension screenSize = 
-				Toolkit.getDefaultToolkit().getScreenSize();
-		int screenWidth = screenSize.width;
-		int screenHeight = screenSize.height;
-		
-		int x = screenWidth/8;
-		int y = screenHeight/16;
-		
-		setSize(screenWidth*3/7,screenHeight*6/8);
-		this.setLocation(x, y);
 		this.setLayout(null);
 		
 		//label 1 show the level of game
 		level = new Label("Level: ");
+		level.addMouseListener(this);
 		level_data = new Label("1");
+		level_data.addMouseListener(this);
 		
 		//label 2 shows the lines of game
 		line = new Label("Lines: ");
+		line.addMouseListener(this);
 		line_data = new Label("0");
+		line_data.addMouseListener(this);
 		
 		//label 3 shows the score of game
 		score = new Label("Score: ");
+		score.addMouseListener(this);
 		score_data = new Label("0");
+		score_data.addMouseListener(this);
 		
 		//quit button
 		quit = new Button("QUIT");
@@ -114,9 +136,6 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		this.add(quit);
 		
 		this.addMouseMotionListener(this);
-		
-		
-		this.setVisible(true);
 		this.addMouseListener(this);	
 		
 	}
@@ -159,23 +178,15 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		score_data.setBounds(PX, iY(rHeight/2 - 3*height - 10), SX , SY);
 		
 		
-		/***********
-		 * start to draw the elements
-		 * *************************/
+/**************************************************************************************************************
+* start to draw the elements
+* **********************************************************************************************************/
 		int ePX, ePY;
 		
 		ePX = iX(rWidth/5 + (width- 4*sqSize)/2);
 		ePY = iY((rHeight/2 - 10)- (height-sqSize)/2);
 		
-/*		g.setColor(Color.black);
-		for(int i = 0; i<4; i++){
-			g.drawRect(ePX+i*Es, ePY, Es, Es);
-		}
-		g.setColor(Color.green);
-		for(int i = 0; i<4; i++){
-			g.fillRect(ePX+i*Es+1, ePY+1, Es-1, Es-1);
-		}
-		*/
+
 		switch(next){
 		case 0:{
 			dE.drawLeftZShape(g, Es, ePX, ePY,0);
@@ -242,16 +253,26 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		}
 	}
 	
-	/*********************************
-	 * These are the movement
-	 * ***********************************************************/
+/************************************************************************************************************************
+* These are the movement
+* *********************************************************************************************************************/
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
 		if(e.getButton() == e.BUTTON1){
+			collum--;
+			if(dE.getLeft() == sqPositionX[0][0]){
+				collum++;
+			}
+			repaint();
 		}
 		
 		else if(e.getButton() == e.BUTTON3){
+			collum++;
+			if(dE.getRight() == sqPositionX[0][9]){
+				collum--;
+			}
+			repaint();
 		}
 	}
 
@@ -282,7 +303,9 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
-		
+		if(e.getSource() == quit){
+			System.exit(0);
+		}
 	}
 
 	@Override
@@ -304,7 +327,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 			if(My>=sqPositionY[0][0] & My<=sqPositionY[19][9]+Es){
 				if(!inside){
 					inside = true;
-					dE.drawString(g, sqPositionX[7][2], sqPositionY[7][2], "PAUSE");
+					dE.drawString(g, Es, sqPositionX[7][2], sqPositionY[7][2], "PAUSE");
 				}
 			}
 			else{
@@ -324,22 +347,9 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 	}
 	
 	
-	/**************************************************
-	 * Here are some functions that will be used by mainArea
-	 * *******************************************/
-	void leftClick(){
-		if(dE.getLeft()>sqPositionX[0][0]){
-			collum--;
-			repaint();
-		}
-	}
-	
-	void rightClick(){
-		if(dE.getRight() < sqPositionX[0][9]){
-			collum++;
-			repaint();
-		}
-	}
+/*******************************************************************************************************************************
+* Here are some functions that will be used by mainArea
+* *******************************************************************************************************************/
 	
 	void fallDown(){
 		repaint();
@@ -723,11 +733,11 @@ class drawElements{
 		}	
 	}
 	
-	void drawString(Graphics g, int Px, int Py, String s){
+	void drawString(Graphics g, int size, int Px, int Py, String s){
 		g.setColor(Color.black);
-		g.drawRect(Px, Py, 215, 65);
-		g.setFont(new Font("Times New Romen", Font.BOLD, 60));
-		g.drawString(s, Px+10, Py+55);
+		g.drawRect(Px, Py, size*7, size*2);
+		g.setFont(new Font("Times New Romen", Font.BOLD, size*2));
+		g.drawString(s, Px, Py+size*2);
 	}
 	
 	void clearSring(Graphics g, int Px, int Py, String s){
