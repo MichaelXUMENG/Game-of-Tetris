@@ -3,11 +3,12 @@ import java.awt.event.*;
 import java.util.Random;
 
 
-public class gameTetris extends Panel implements MouseMotionListener, ActionListener,MouseListener{
+public class gameTetris extends Panel implements MouseMotionListener, ActionListener,MouseListener, MouseWheelListener{
 
 	static int current, next;
 	static boolean start = true;
 	static boolean round = false;
+	static boolean falling = true;
 	
 	//declare the button and labels
 	static public Button quit; 
@@ -24,10 +25,13 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 	static int PX, PY, SX, SY, Es; //the actual position of pixel: PX,PY are position; SX,SY are actual size, and Es is the actual size of a square.
 	static int[][] sqPositionX = new int[20][10];
 	static int[][] sqPositionY = new int[20][10];
+	static int[][] stored = new int[20][10];
+	static int[] highest = new int[10];
 
 	static drawElements dE = new drawElements( );
 		
 	static int row = 0, collum = 3;
+	static int shape;
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -54,31 +58,314 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		outFrame.setResizable(true);
 		outFrame.setVisible(true);
 		
+		for(int i = 0; i<10; i++){
+			highest[i] = 19;
+		}
+		for (int i = 0; i<20; i++){
+			for(int j = 0; j<10; j++){
+				stored[i][j] = 0;
+			}
+		}
+		
 		
 		next = new Random().nextInt(6);
 		current = next;
 		
+		/************* Function of falling ***********************/
 		while(true){
-			while(start){
-				row = 0;
+			while(start){ // Start to fall
 				current = next;
 				next = new Random().nextInt(7);
+				shape = 0;
+				/*********** Customerize the start point of each shape *************************/
+				switch(current){
+				case 0:{
+					row = 1;
+					collum = 4;
+					break;
+				}
+				case 1:{
+					row = 1;
+					collum = 5;
+					break;
+				}
+				case 2:{
+					row = 1;
+					collum = 4;
+					break;
+				}
+				case 3:{
+					row = 1;
+					collum = 5;
+					break;
+				}
+				case 4:{
+					row = 1;
+					collum = 4;
+					break;
+				}
+				case 5:{
+					row = 1;
+					collum = 4;
+					break;
+				}
+				case 6:{
+					row = 0;
+					collum = 3;
+					break;
+				}
+				}
+				
 				gT.repaint();
 				round = true;
+				/************* Falling functions *******************************/
 				while(round){
-					try {
-						Thread.sleep(1000);
-						if(dE.getBottom() == sqPositionY[19][0]){
-							break;
+					if(falling){
+						try {
+							Thread.sleep(500);
+							
+							/********** Check if the shape hit the bottom**************************/
+							
+							if(current == 0){ // left Z shape
+								if(shape%2 == 0){
+									if((row == highest[collum])||(row == highest[collum-1])||(row-1 == highest[collum+1])){
+										stored[row][collum] = 1;
+										stored[row][collum-1] = 1;
+										stored[row-1][collum] = 1;
+										stored[row-1][collum+1] = 1;
+										highest[collum] = row - 2;
+										highest[collum-1] = row - 1;
+										highest[collum+1] = row - 2;
+										break;
+									}
+								}
+								else{
+									if((row == highest[collum]-1)||(row == highest[collum-1])){
+										stored[row][collum] = 1;
+										stored[row+1][collum] = 1;
+										stored[row][collum-1] = 1;
+										stored[row-1][collum-1] = 1;
+										highest[collum] = row - 1;
+										highest[collum-1] = row - 2;
+										break;
+									}
+								}
+							}
+							else if (current == 1){// Right Z shape
+								if(shape%2 == 0){
+									if((row == highest[collum])||(row == highest[collum+1])||(row == highest[collum-1]+1)){
+										stored[row][collum] = 1;
+										stored[row][collum+1] = 1;
+										stored[row-1][collum] = 1;
+										stored[row-1][collum-1] = 1;
+										highest[collum] = row - 2;
+										highest[collum-1] = row - 2;
+										highest[collum+1] = row - 1;
+										break;
+									}
+								}
+								else{
+									if((row == highest[collum])||(row == highest[collum-1]-1)){
+										stored[row][collum] = 1;
+										stored[row-1][collum] = 1;
+										stored[row][collum-1] = 1;
+										stored[row+1][collum-1] = 1;
+										highest[collum] = row - 2;
+										highest[collum-1] = row - 1;
+										break;
+									}
+								}
+							}
+							else if (current == 2){// Left L shape
+								if(shape%4 == 0){
+									if((row == highest[collum]) || (row == highest[collum-1]) || (row == highest[collum+1])){
+										stored[row][collum]=1;
+										stored[row][collum+1]=1;
+										stored[row][collum-1]=1;
+										stored[row-1][collum-1]=1;
+										highest[collum] = row-1;
+										highest[collum-1] = row -2;
+										highest[collum+1] = row -1;
+										break;
+									}
+								}
+								else if(shape%4 ==1){
+									if((row == highest[collum]-1) || (row == highest[collum+1]+1)){
+										stored[row][collum]=1;
+										stored[row+1][collum]=1;
+										stored[row-1][collum]=1;
+										stored[row-1][collum+1]=1;
+										highest[collum] = row-2;
+										highest[collum+1] = row -2;
+										break;
+									}
+								}
+								else if(shape%4 ==2){
+									if((row == highest[collum]) || (row == highest[collum-1]) || (row == highest[collum+1]-1)){
+										stored[row][collum]=1;
+										stored[row][collum+1]=1;
+										stored[row][collum-1]=1;
+										stored[row+1][collum+1]=1;
+										highest[collum] = row-1;
+										highest[collum-1] = row -1;
+										highest[collum+1] = row -1;
+										break;
+									}
+								}
+								else if (shape%4 ==3){
+									if((row == highest[collum]-1) || (row == highest[collum-1]-1)){
+										stored[row][collum]=1;
+										stored[row+1][collum]=1;
+										stored[row-1][collum]=1;
+										stored[row+1][collum-1]=1;
+										highest[collum] = row-2;
+										highest[collum-1] = row;
+										break;
+									}
+								}
+							}
+							else if (current == 3){// Right L shape
+								if(shape%4 == 0){
+									if((row == highest[collum]) || (row == highest[collum-1]) || (row == highest[collum+1])){
+										stored[row][collum]=1;
+										stored[row][collum+1]=1;
+										stored[row][collum-1]=1;
+										stored[row-1][collum+1]=1;
+										highest[collum] = row-1;
+										highest[collum+1] = row -2;
+										highest[collum-1] = row -1;
+										break;
+									}
+								}
+								else if(shape%4 ==1){
+									if((row == highest[collum]-1) || (row == highest[collum+1]-1)){
+										stored[row][collum]=1;
+										stored[row+1][collum]=1;
+										stored[row-1][collum]=1;
+										stored[row+1][collum+1]=1;
+										highest[collum] = row-2;
+										highest[collum+1] = row;
+										break;
+									}
+								}
+								else if(shape%4 ==2){
+									if((row == highest[collum]) || (row == highest[collum-1]-1) || (row == highest[collum+1])){
+										stored[row][collum]=1;
+										stored[row][collum+1]=1;
+										stored[row][collum-1]=1;
+										stored[row+1][collum-1]=1;
+										highest[collum] = row-1;
+										highest[collum-1] = row -1;
+										highest[collum+1] = row -1;
+										break;
+									}
+								}
+								else if (shape%4 ==3){
+									if((row == highest[collum]-1) || (row == highest[collum-1]+1)){
+										stored[row][collum]=1;
+										stored[row+1][collum]=1;
+										stored[row-1][collum]=1;
+										stored[row-1][collum-1]=1;
+										highest[collum] = row-2;
+										highest[collum-1] = row -2;
+										break;
+									}
+								}
+							}
+							else if (current == 4){// cube
+								if((row == highest[collum]) || (row == highest[collum+1])){
+									stored[row][collum] = 1;
+									stored[row][collum+1] = 1;
+									stored[row-1][collum] = 1;
+									stored[row-1][collum+1] = 1;
+									highest[collum] = row -2;
+									highest[collum+1] = row -2;
+									break;
+								}
+							}
+							else if (current == 5){// Hill
+								if(shape%4 == 0){
+									if((row == highest[collum]) || (row == highest[collum-1]) || (row == highest[collum+1])){
+										stored[row][collum]=1;
+										stored[row][collum+1]=1;
+										stored[row][collum-1]=1;
+										stored[row-1][collum]=1;
+										highest[collum] = row-2;
+										highest[collum+1] = row -1;
+										highest[collum-1] = row -1;
+										break;
+									}
+								}
+								else if(shape%4 ==1){
+									if((row == highest[collum]-1) || (row == highest[collum+1])){
+										stored[row][collum] = 1;
+										stored[row][collum+1] = 1;
+										stored[row-1][collum] = 1;
+										stored[row+1][collum] = 1;
+										highest[collum] = row -2;
+										highest[collum+1] = row -1;
+										break;
+									}
+								}
+								else if(shape%4 ==2){
+									if((row == highest[collum]-1) || (row == highest[collum-1]) || (row == highest[collum+1])){
+										stored[row][collum]=1;
+										stored[row][collum+1]=1;
+										stored[row][collum-1]=1;
+										stored[row+1][collum]=1;
+										highest[collum] = row-1;
+										highest[collum+1] = row -1;
+										highest[collum-1] = row -1;
+										break;
+									}
+								}
+								else if (shape%4 ==3){
+									if((row == highest[collum]-1) || (row == highest[collum-1])){
+										stored[row][collum] = 1;
+										stored[row][collum-1] = 1;
+										stored[row-1][collum] = 1;
+										stored[row+1][collum] = 1;
+										highest[collum] = row -2;
+										highest[collum-1] = row -1;
+										break;
+									}
+								}
+							}
+							else if (current == 6){// Line
+								if(shape%2 == 0){
+									if((row == highest[collum]) || (row == highest[collum-1]) || (row == highest[collum+1]) || (row == highest[collum+2])){
+										stored[row][collum] = 1;
+										stored[row][collum-1] = 1;
+										stored[row][collum+1] = 1;
+										stored[row][collum+2] = 1;
+										highest[collum] = row -1;
+										highest[collum-1] = row -1;
+										highest[collum+1] = row -1;
+										highest[collum+2] = row -1;
+										break;
+									}
+								}
+								else{
+									if((row == highest[collum]-2)){
+										stored[row][collum] = 1;
+										stored[row-1][collum] = 1;
+										stored[row+1][collum] = 1;
+										stored[row+2][collum] = 1;
+										highest[collum] = row -2;
+										break;
+									}
+								}
+							}
+							
+							
+							row++;
+							gT.repaint();
+							
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
-						row++;
-						gT.repaint();
-						
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
 					}
-					
 				} 
 			}
 		}
@@ -136,7 +423,8 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		this.add(quit);
 		
 		this.addMouseMotionListener(this);
-		this.addMouseListener(this);	
+		this.addMouseListener(this);
+		this.addMouseWheelListener(this);
 		
 	}
 
@@ -144,11 +432,10 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 	public void paint(Graphics g){
 		super.paint(g);
 		initial();
-		g.setColor(Color.white);
 		
 		//create the big white area
 		PX=iX(-rWidth/2); PY=iY(rHeight/2 - 5); //get the position left-top corner of the big area
-		dE.fillArea(g, Es, PX, PY, 10, 20);
+		dE.fillArea(g, Es, PX, PY, 10, 20, stored);
 		
 		//store all the position into the array
 		for(int i = 0; i<20; i++){
@@ -162,6 +449,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		width = rWidth*2/5; height = width/2;
 		PX=iX(rWidth/5); PY=iY(rHeight/2 - 5); 
 		SX= Math.round(width / pixelSize); SY=Math.round(height/pixelSize);
+		g.setColor(Color.white);
 		g.fillRect(PX, PY, SX , SY);
 		
 		//set the position of labels and button
@@ -222,31 +510,31 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		
 		switch(current){
 		case 0:{
-			dE.drawLeftZShape(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],0);
+			dE.drawLeftZShape(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],shape);
 			break;
 		}
 		case 1:{
-			dE.drawRightZShape(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],0);
+			dE.drawRightZShape(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],shape);
 			break;
 		}
 		case 2:{
-			dE.drawLeftLShape(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],0);
+			dE.drawLeftLShape(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],shape);
 			break;
 		}
 		case 3:{
-			dE.drawRightLShape(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],0);
+			dE.drawRightLShape(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],shape);
 			break;
 		}
 		case 4:{
-			dE.drawCube(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],0);
+			dE.drawCube(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],shape);
 			break;
 		}
 		case 5:{
-			dE.drawHillShape(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],0);
+			dE.drawHillShape(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],shape);
 			break;
 		}
 		case 6:{
-			dE.drawLine(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],0);
+			dE.drawLine(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],shape);
 			break;
 		}
 		
@@ -328,12 +616,14 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				if(!inside){
 					inside = true;
 					dE.drawString(g, Es, sqPositionX[7][2], sqPositionY[7][2], "PAUSE");
+					falling = false;
 				}
 			}
 			else{
 				if(!inside){
 					inside = false;
 					repaint();
+					falling = true;
 				}
 			}
 		}
@@ -341,25 +631,182 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 			if(!inside){
 				inside = false;
 				repaint();
+				falling = true;
 			}
 		}
 		
 	}
 	
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent e) {
+		// TODO Auto-generated method stub
+		if(e.getWheelRotation() == 1){
+			if(falling){
+				shape--;
+				switch(current){
+				case 0:{
+					if(shape%2 == 0){
+						if(row <= 18){
+							repaint();
+						}
+					}
+					else{
+						repaint();
+					}
+					break;
+				}
+				case 1:{
+					if(shape%2 == 0){
+						if(row <= 18){
+							repaint();
+						}
+					}
+					else{
+						repaint();
+					}
+					break;
+				}
+				case 2:{
+					if(shape%4 == 0){
+						if(row <= 18){
+							repaint();
+						}
+					}
+					else{
+						repaint();
+					}
+					break;
+				}
+				case 3:{
+					if(shape%4 == 0){
+						if(row <= 18){
+							repaint();
+						}
+					}
+					else{
+						repaint();
+					}
+					break;
+				}
+				case 4:{
+					repaint();
+					break;
+				}
+				case 5:{
+					if(shape%4 == 0){
+						if(row <= 18){
+							repaint();
+						}
+					}
+					else{
+						repaint();
+					}
+					break;
+				}
+				case 6:{
+					if(shape%2 == 0){
+						if(row <= 17){
+							repaint();
+						}
+					}
+					else{
+						repaint();
+					}
+					break;
+				}		
+				}
+			}
+		}
+		else if(e.getWheelRotation() == -1){
+			if(falling){
+				shape++;
+				switch(current){
+				case 0:{
+					if(shape%2 == 0){
+						if(row <= 18){
+							repaint();
+						}
+					}
+					else{
+						repaint();
+					}
+					break;
+				}
+				case 1:{
+					if(shape%2 == 0){
+						if(row <= 18){
+							repaint();
+						}
+					}
+					else{
+						repaint();
+					}
+					break;
+				}
+				case 2:{
+					if(shape%4 == 0){
+						if(row <= 18){
+							repaint();
+						}
+					}
+					else{
+						repaint();
+					}
+					break;
+				}
+				case 3:{
+					if(shape%4 == 0){
+						if(row <= 18){
+							repaint();
+						}
+					}
+					else{
+						repaint();
+					}
+					break;
+				}
+				case 4:{
+					repaint();
+					break;
+				}
+				case 5:{
+					if(shape%4 == 0){
+						if(row <= 18){
+							repaint();
+						}
+					}
+					else{
+						repaint();
+					}
+					break;
+				}
+				case 6:{
+					if(shape%2 == 0){
+						if(row <= 17){
+							repaint();
+						}
+					}
+					else{
+						repaint();
+					}
+					break;
+				}
+				}
+			}
+		}
+	}
+
 	
 /*******************************************************************************************************************************
 * Here are some functions that will be used by mainArea
 * *******************************************************************************************************************/
 	
-	void fallDown(){
-		repaint();
-		row--;
-	}
-	
 	void setShapes(int big, int small){
 		this.current = big;
 		this.next = small;
 	}
+
+
 
 
 }
@@ -379,7 +826,7 @@ class drawElements{
 	
 	void drawLine(Graphics g, int size, int Px, int Py, int index){
 		int shape;
-		shape = index%2;
+		shape = Math.abs(index)%2;
 		switch(shape){
 		case 0: {
 			leftMost = Px; rightMost = Px + 3*size; bottom = Py;
@@ -440,7 +887,7 @@ class drawElements{
 	
 	void drawRightLShape(Graphics g, int size, int Px, int Py, int index){
 		int shape;
-		shape = index%4;
+		shape = Math.abs(index)%4;
 		switch(shape){
 		case 0:{
 			leftMost = Px-size; rightMost = Px + size; bottom = Py;
@@ -509,7 +956,7 @@ class drawElements{
 	
 	void drawLeftLShape(Graphics g, int size, int Px, int Py, int index){
 		int shape;
-		shape = index%4;
+		shape = Math.abs(index)%4;
 		switch(shape){
 		case 0:{
 			leftMost = Px-size; rightMost = Px + size; bottom = Py;
@@ -578,7 +1025,7 @@ class drawElements{
 	
 	void drawLeftZShape(Graphics g, int size, int Px, int Py, int index){
 		int shape;
-		shape = index%2;
+		shape = Math.abs(index)%2;
 		switch(shape){
 		case 0:{
 			leftMost = Px-size; rightMost = Px +size; bottom = Py;
@@ -596,18 +1043,18 @@ class drawElements{
 			break;
 		}
 		case 1:{
-			leftMost = Px; rightMost = Px + size; bottom = Py+size;
+			leftMost = Px-size; rightMost = Px; bottom = Py+size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
-			g.drawRect(Px, Py-size, size, size);
-			g.drawRect(Px+size, Py, size, size);
-			g.drawRect(Px+size, Py+size, size, size);
+			g.drawRect(Px, Py+size, size, size);
+			g.drawRect(Px-size, Py, size, size);
+			g.drawRect(Px-size, Py-size, size, size);
 			
 			g.setColor(Color.yellow);
 			g.fillRect(Px+1, Py+1, size-1, size-1);
-			g.fillRect(Px+1, Py-size+1, size-1, size-1);
-			g.fillRect(Px+size+1, Py+1, size-1, size-1);
-			g.fillRect(Px+size+1, Py+size+1, size-1, size-1);
+			g.fillRect(Px+1, Py+size+1, size-1, size-1);
+			g.fillRect(Px-size+1, Py+1, size-1, size-1);
+			g.fillRect(Px-size+1, Py-size+1, size-1, size-1);
 			break;
 		}
 		
@@ -616,7 +1063,7 @@ class drawElements{
 	
 	void drawRightZShape(Graphics g, int size, int Px, int Py, int index){
 		int shape;
-		shape = index%2;
+		shape = Math.abs(index)%2;
 		switch(shape){
 		case 0:{
 			leftMost = Px-size; rightMost = Px + size; bottom = Py;
@@ -634,7 +1081,7 @@ class drawElements{
 			break;
 		}
 		case 1:{
-			leftMost = Px; rightMost = Px + size; bottom = Py+size;
+			leftMost = Px-size; rightMost = Px; bottom = Py+size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px, Py-size, size, size);
@@ -655,7 +1102,7 @@ class drawElements{
 	
 	void drawHillShape(Graphics g, int size, int Px, int Py, int index){
 		int shape;
-		shape = index%4;
+		shape = Math.abs(index)%4;
 		switch(shape){
 		case 0:{
 			leftMost = Px-size; rightMost = Px + size; bottom = Py;
@@ -724,11 +1171,20 @@ class drawElements{
 	
 	
 	
-	void fillArea(Graphics g, int size, int Px, int Py, int length, int height){
+	void fillArea(Graphics g, int size, int Px, int Py, int length, int height, int black[][]){
 		g.setColor(Color.white);
 		for(int i =0; i< height; i++){
 			for(int j = 0; j< length; j++){
-				g.fillRect(Px+j*size, Py+i*size, size+1, size+1);
+				if(black[i][j] == 1){
+					g.setColor(Color.cyan);
+					g.fillRect(Px+j*size, Py+i*size, size+1, size+1);
+					g.setColor(Color.black);
+					g.drawRect(Px+j*size, Py+i*size, size+1, size+1);
+				}
+				else{
+					g.setColor(Color.white);
+					g.fillRect(Px+j*size, Py+i*size, size+1, size+1);
+				}
 			}
 		}	
 	}
