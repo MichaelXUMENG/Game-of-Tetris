@@ -1,20 +1,22 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Random;
+import java.awt.geom.Point2D;
+import java.util.*;
+import java.math.*;
 
 
 public class gameTetris extends Panel implements MouseMotionListener, ActionListener,MouseListener, MouseWheelListener{
 
-	static int current, next;
-	static boolean start = true;
-	static boolean round = false;
-	static boolean falling = true;
+	static int current, next;  // these two variables are used for store the shape of objects
+	static boolean start = true;  //decide whether the game is starting
+	static boolean round = false; //decide whether one object in terminated
+	static boolean falling = true;// decide whether the game is pause or not
 	
 	//declare the button and labels
-	static public Button quit; 
+	static public Button quit, startgame; 
 	static public Label level, line, score, level_data, line_data, score_data;
 	
-	static Frame outFrame = new Frame();
+	static Frame outFrame = new Frame(); // a Frame to contain the mainarea
 		
 	//declare the variables used to calculate the coordinates
 	static int centerX, centerY; // the central pixel's position
@@ -23,20 +25,21 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 			sqSize; //logical size of a square
 		
 	static int PX, PY, SX, SY, Es; //the actual position of pixel: PX,PY are position; SX,SY are actual size, and Es is the actual size of a square.
-	static int[][] sqPositionX = new int[20][10];
-	static int[][] sqPositionY = new int[20][10];
-	static int[][] stored = new int[20][10];
-	static int[] highest = new int[10];
+	static int[][] sqPositionX = new int[20][10]; // store all the device x-coordinates of all the cubes
+	static int[][] sqPositionY = new int[20][10]; // store all the device y-coordinates of all the cubes
+	static int[][] stored = new int[20][10]; // store the index of cubes which have been occupied
 
 	static drawElements dE = new drawElements( );
 		
-	static int row = 0, collum = 3;
-	static int shape;
+	static int row, column; // variables of index of row and column for the starting cube of each object
+	static int shape; //used for deciding what shape of each object
+	static int fallingSpeed = 500;
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		gameTetris gT = new gameTetris();
 		
+		// set up the frame size
 		Dimension screenSize = 
 				Toolkit.getDefaultToolkit().getScreenSize();
 		int screenWidth = screenSize.width;
@@ -53,23 +56,22 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		outFrame.setSize(screenWidth*3/7,screenHeight*6/8);
 		outFrame.setLocation(x, y);
 		
+		// add the functional part
 		outFrame.add(gT);
 		
 		outFrame.setResizable(true);
 		outFrame.setVisible(true);
 		
-		for(int i = 0; i<10; i++){
-			highest[i] = 19;
-		}
+		
+		//initialize all the cubes to be unused
 		for (int i = 0; i<20; i++){
 			for(int j = 0; j<10; j++){
 				stored[i][j] = 0;
 			}
 		}
 		
-		
+		//Randomly choose the next object and the current one
 		next = new Random().nextInt(6);
-		current = next;
 		
 		/************* Function of falling ***********************/
 		while(true){
@@ -79,39 +81,39 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				shape = 0;
 				/*********** Customerize the start point of each shape *************************/
 				switch(current){
-				case 0:{
+				case 0:{//left Z shape
 					row = 1;
-					collum = 4;
+					column = 4;
 					break;
 				}
-				case 1:{
+				case 1:{//right Z shape
 					row = 1;
-					collum = 5;
+					column = 5;
 					break;
 				}
-				case 2:{
+				case 2:{//left L shape
 					row = 1;
-					collum = 4;
+					column = 4;
 					break;
 				}
-				case 3:{
+				case 3:{//right L shape
 					row = 1;
-					collum = 5;
+					column = 5;
 					break;
 				}
-				case 4:{
+				case 4:{//cube
 					row = 1;
-					collum = 4;
+					column = 4;
 					break;
 				}
-				case 5:{
+				case 5:{//Hill
 					row = 1;
-					collum = 4;
+					column = 4;
 					break;
 				}
-				case 6:{
+				case 6:{//Line
 					row = 0;
-					collum = 3;
+					column = 3;
 					break;
 				}
 				}
@@ -122,236 +124,194 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				while(round){
 					if(falling){
 						try {
-							Thread.sleep(500);
-							
-							/********** Check if the shape hit the bottom**************************/
-							
+							Thread.sleep(fallingSpeed);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+						/********** Check if the shape hit the bottom **************************/
+						
+						if(falling){
 							if(current == 0){ // left Z shape
-								if(shape%2 == 0){
-									if((row == highest[collum])||(row == highest[collum-1])||(row-1 == highest[collum+1])){
-										stored[row][collum] = 1;
-										stored[row][collum-1] = 1;
-										stored[row-1][collum] = 1;
-										stored[row-1][collum+1] = 1;
-										highest[collum] = row - 2;
-										highest[collum-1] = row - 1;
-										highest[collum+1] = row - 2;
+								if(Math.abs(shape)%2 == 0){
+									if((row == 19)||(stored[row+1][column] == 1)||(stored[row+1][column-1] == 1)||(stored[row][column+1] == 1)){
+										stored[row][column] = 1;
+										stored[row][column-1] = 1;
+										stored[row-1][column] = 1;
+										stored[row-1][column+1] = 1;
 										break;
 									}
 								}
 								else{
-									if((row == highest[collum]-1)||(row == highest[collum-1])){
-										stored[row][collum] = 1;
-										stored[row+1][collum] = 1;
-										stored[row][collum-1] = 1;
-										stored[row-1][collum-1] = 1;
-										highest[collum] = row - 1;
-										highest[collum-1] = row - 2;
+									if((row == 18)||(stored[row+2][column] == 1)||(stored[row+1][column-1] == 1)){
+										stored[row][column] = 1;
+										stored[row+1][column] = 1;
+										stored[row][column-1] = 1;
+										stored[row-1][column-1] = 1;
 										break;
 									}
 								}
 							}
 							else if (current == 1){// Right Z shape
-								if(shape%2 == 0){
-									if((row == highest[collum])||(row == highest[collum+1])||(row == highest[collum-1]+1)){
-										stored[row][collum] = 1;
-										stored[row][collum+1] = 1;
-										stored[row-1][collum] = 1;
-										stored[row-1][collum-1] = 1;
-										highest[collum] = row - 2;
-										highest[collum-1] = row - 2;
-										highest[collum+1] = row - 1;
+								if(Math.abs(shape)%2 == 0){
+									if((row == 19)||(stored[row+1][column] == 1)||(stored[row+1][column+1] == 1)||(stored[row][column-1] == 1)){
+										stored[row][column] = 1;
+										stored[row][column+1] = 1;
+										stored[row-1][column] = 1;
+										stored[row-1][column-1] = 1;
 										break;
 									}
 								}
 								else{
-									if((row == highest[collum])||(row == highest[collum-1]-1)){
-										stored[row][collum] = 1;
-										stored[row-1][collum] = 1;
-										stored[row][collum-1] = 1;
-										stored[row+1][collum-1] = 1;
-										highest[collum] = row - 2;
-										highest[collum-1] = row - 1;
+									if((row == 18)||(stored[row+1][column] == 1)||(stored[row+2][column-1] == 1)){
+										stored[row][column] = 1;
+										stored[row-1][column] = 1;
+										stored[row][column-1] = 1;
+										stored[row+1][column-1] = 1;
 										break;
 									}
 								}
 							}
 							else if (current == 2){// Left L shape
-								if(shape%4 == 0){
-									if((row == highest[collum]) || (row == highest[collum-1]) || (row == highest[collum+1])){
-										stored[row][collum]=1;
-										stored[row][collum+1]=1;
-										stored[row][collum-1]=1;
-										stored[row-1][collum-1]=1;
-										highest[collum] = row-1;
-										highest[collum-1] = row -2;
-										highest[collum+1] = row -1;
+								if(Math.abs(shape)%4 == 0){
+									if((row == 19)||(stored[row+1][column] == 1) || (stored[row+1][column-1] == 1) || (stored[row+1][column+1] ==1)){
+										stored[row][column]=1;
+										stored[row][column+1]=1;
+										stored[row][column-1]=1;
+										stored[row-1][column-1]=1;
 										break;
 									}
 								}
-								else if(shape%4 ==1){
-									if((row == highest[collum]-1) || (row == highest[collum+1]+1)){
-										stored[row][collum]=1;
-										stored[row+1][collum]=1;
-										stored[row-1][collum]=1;
-										stored[row-1][collum+1]=1;
-										highest[collum] = row-2;
-										highest[collum+1] = row -2;
+								else if(Math.abs(shape)%4 ==1){
+									if((row == 18)||(stored[row+2][column] == 1) || (stored[row][column+1] == 1)){
+										stored[row][column]=1;
+										stored[row+1][column]=1;
+										stored[row-1][column]=1;
+										stored[row-1][column+1]=1;
 										break;
 									}
 								}
-								else if(shape%4 ==2){
-									if((row == highest[collum]) || (row == highest[collum-1]) || (row == highest[collum+1]-1)){
-										stored[row][collum]=1;
-										stored[row][collum+1]=1;
-										stored[row][collum-1]=1;
-										stored[row+1][collum+1]=1;
-										highest[collum] = row-1;
-										highest[collum-1] = row -1;
-										highest[collum+1] = row -1;
+								else if(Math.abs(shape)%4 ==2){
+									if((row == 18)||(stored[row+1][column] == 1) || (stored[row+1][column-1] == 1) || (stored[row+2][column+1] == 1)){
+										stored[row][column]=1;
+										stored[row][column+1]=1;
+										stored[row][column-1]=1;
+										stored[row+1][column+1]=1;
 										break;
 									}
 								}
-								else if (shape%4 ==3){
-									if((row == highest[collum]-1) || (row == highest[collum-1]-1)){
-										stored[row][collum]=1;
-										stored[row+1][collum]=1;
-										stored[row-1][collum]=1;
-										stored[row+1][collum-1]=1;
-										highest[collum] = row-2;
-										highest[collum-1] = row;
+								else if (Math.abs(shape)%4 ==3){
+									if((row == 18)||(stored[row+2][column] == 1) || (stored[row+2][column-1] == 1)){
+										stored[row][column]=1;
+										stored[row+1][column]=1;
+										stored[row-1][column]=1;
+										stored[row+1][column-1]=1;
 										break;
 									}
 								}
 							}
 							else if (current == 3){// Right L shape
-								if(shape%4 == 0){
-									if((row == highest[collum]) || (row == highest[collum-1]) || (row == highest[collum+1])){
-										stored[row][collum]=1;
-										stored[row][collum+1]=1;
-										stored[row][collum-1]=1;
-										stored[row-1][collum+1]=1;
-										highest[collum] = row-1;
-										highest[collum+1] = row -2;
-										highest[collum-1] = row -1;
+								if(Math.abs(shape)%4 == 0){
+									if((row == 19)||(stored[row+1][column] == 1) || (stored[row+1][column-1] == 1) || (stored[row+1][column+1] == 1)){
+										stored[row][column]=1;
+										stored[row][column+1]=1;
+										stored[row][column-1]=1;
+										stored[row-1][column+1]=1;
 										break;
 									}
 								}
-								else if(shape%4 ==1){
-									if((row == highest[collum]-1) || (row == highest[collum+1]-1)){
-										stored[row][collum]=1;
-										stored[row+1][collum]=1;
-										stored[row-1][collum]=1;
-										stored[row+1][collum+1]=1;
-										highest[collum] = row-2;
-										highest[collum+1] = row;
+								else if(Math.abs(shape)%4 ==1){
+									if((row == 18)||(stored[row+2][column] == 1) || (stored[row+2][column+1] == 1)){
+										stored[row][column]=1;
+										stored[row+1][column]=1;
+										stored[row-1][column]=1;
+										stored[row+1][column+1]=1;
 										break;
 									}
 								}
-								else if(shape%4 ==2){
-									if((row == highest[collum]) || (row == highest[collum-1]-1) || (row == highest[collum+1])){
-										stored[row][collum]=1;
-										stored[row][collum+1]=1;
-										stored[row][collum-1]=1;
-										stored[row+1][collum-1]=1;
-										highest[collum] = row-1;
-										highest[collum-1] = row -1;
-										highest[collum+1] = row -1;
+								else if(Math.abs(shape)%4 ==2){
+									if((row == 18)||(stored[row+1][column] == 1) || (stored[row+2][column-1] == 1) || (stored[row+1][column+1] == 1)){
+										stored[row][column]=1;
+										stored[row][column+1]=1;
+										stored[row][column-1]=1;
+										stored[row+1][column-1]=1;
 										break;
 									}
 								}
-								else if (shape%4 ==3){
-									if((row == highest[collum]-1) || (row == highest[collum-1]+1)){
-										stored[row][collum]=1;
-										stored[row+1][collum]=1;
-										stored[row-1][collum]=1;
-										stored[row-1][collum-1]=1;
-										highest[collum] = row-2;
-										highest[collum-1] = row -2;
+								else if (Math.abs(shape)%4 ==3){
+									if((row == 18)||(stored[row+2][column] == 1) || (stored[row][column-1] ==1)){
+										stored[row][column]=1;
+										stored[row+1][column]=1;
+										stored[row-1][column]=1;
+										stored[row-1][column-1]=1;
 										break;
 									}
 								}
 							}
 							else if (current == 4){// cube
-								if((row == highest[collum]) || (row == highest[collum+1])){
-									stored[row][collum] = 1;
-									stored[row][collum+1] = 1;
-									stored[row-1][collum] = 1;
-									stored[row-1][collum+1] = 1;
-									highest[collum] = row -2;
-									highest[collum+1] = row -2;
+								if((row == 19)||(stored[row+1][column] == 1) || (stored[row+1][column+1] == 1)){
+									stored[row][column] = 1;
+									stored[row][column+1] = 1;
+									stored[row-1][column] = 1;
+									stored[row-1][column+1] = 1;
 									break;
 								}
 							}
 							else if (current == 5){// Hill
-								if(shape%4 == 0){
-									if((row == highest[collum]) || (row == highest[collum-1]) || (row == highest[collum+1])){
-										stored[row][collum]=1;
-										stored[row][collum+1]=1;
-										stored[row][collum-1]=1;
-										stored[row-1][collum]=1;
-										highest[collum] = row-2;
-										highest[collum+1] = row -1;
-										highest[collum-1] = row -1;
+								if(Math.abs(shape)%4 == 0){
+									if((row == 19)||(stored[row+1][column] == 1) || (stored[row+1][column-1] == 1) || (stored[row+1][column+1] == 1)){
+										stored[row][column]=1;
+										stored[row][column+1]=1;
+										stored[row][column-1]=1;
+										stored[row-1][column]=1;
 										break;
 									}
 								}
-								else if(shape%4 ==1){
-									if((row == highest[collum]-1) || (row == highest[collum+1])){
-										stored[row][collum] = 1;
-										stored[row][collum+1] = 1;
-										stored[row-1][collum] = 1;
-										stored[row+1][collum] = 1;
-										highest[collum] = row -2;
-										highest[collum+1] = row -1;
+								else if(Math.abs(shape)%4 ==1){
+									if((stored[row+2][column] == 1) || (stored[row+1][column+1] == 1)||(row == 18)){
+										stored[row][column] = 1;
+										stored[row][column+1] = 1;
+										stored[row-1][column] = 1;
+										stored[row+1][column] = 1;
 										break;
 									}
 								}
-								else if(shape%4 ==2){
-									if((row == highest[collum]-1) || (row == highest[collum-1]) || (row == highest[collum+1])){
-										stored[row][collum]=1;
-										stored[row][collum+1]=1;
-										stored[row][collum-1]=1;
-										stored[row+1][collum]=1;
-										highest[collum] = row-1;
-										highest[collum+1] = row -1;
-										highest[collum-1] = row -1;
+								else if(Math.abs(shape)%4 ==2){
+									if((row == 18)||(stored[row+2][column] == 1) || (stored[row+1][column-1] == 1) || (stored[row+1][column+1] == 1)){
+										stored[row][column]=1;
+										stored[row][column+1]=1;
+										stored[row][column-1]=1;
+										stored[row+1][column]=1;
 										break;
 									}
 								}
-								else if (shape%4 ==3){
-									if((row == highest[collum]-1) || (row == highest[collum-1])){
-										stored[row][collum] = 1;
-										stored[row][collum-1] = 1;
-										stored[row-1][collum] = 1;
-										stored[row+1][collum] = 1;
-										highest[collum] = row -2;
-										highest[collum-1] = row -1;
+								else if (Math.abs(shape)%4 ==3){
+									if((row == 18)||(stored[row+2][column] == -1) || (stored[row+1][column-1] == 1)){
+										stored[row][column] = 1;
+										stored[row][column-1] = 1;
+										stored[row-1][column] = 1;
+										stored[row+1][column] = 1;
 										break;
 									}
 								}
 							}
 							else if (current == 6){// Line
-								if(shape%2 == 0){
-									if((row == highest[collum]) || (row == highest[collum-1]) || (row == highest[collum+1]) || (row == highest[collum+2])){
-										stored[row][collum] = 1;
-										stored[row][collum-1] = 1;
-										stored[row][collum+1] = 1;
-										stored[row][collum+2] = 1;
-										highest[collum] = row -1;
-										highest[collum-1] = row -1;
-										highest[collum+1] = row -1;
-										highest[collum+2] = row -1;
+								if(Math.abs(shape)%2 == 0){
+									if((row == 19)||(stored[row+1][column] == 1) || (stored[row+1][column-1] == 1) || (stored[row+1][column+1] == 1) || (stored[row+1][column+2] == 1)){
+										stored[row][column] = 1;
+										stored[row][column-1] = 1;
+										stored[row][column+1] = 1;
+										stored[row][column+2] = 1;
 										break;
 									}
 								}
 								else{
-									if((row == highest[collum]-2)){
-										stored[row][collum] = 1;
-										stored[row-1][collum] = 1;
-										stored[row+1][collum] = 1;
-										stored[row+2][collum] = 1;
-										highest[collum] = row -2;
+									if((row == 17)||(stored[row+3][column] == 1)){
+										stored[row][column] = 1;
+										stored[row-1][column] = 1;
+										stored[row+1][column] = 1;
+										stored[row+2][column] = 1;
 										break;
 									}
 								}
@@ -360,18 +320,16 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 							
 							row++;
 							gT.repaint();
-							
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
 						}
+						
 					}
 				} 
 			}
 		}
 	}
 	
-	void initial(){
+	/********* initialize the useful variables *****************/
+	void initial(){ 
 		Dimension d = this.getSize();
 		int maxX = d.width - 1, maxY = d.height - 1;
 		pixelSize = Math.max(rWidth/maxX, rHeight/maxY);
@@ -384,6 +342,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		Es =  Math.round(sqSize/ pixelSize);//calculate the actual size of a square(how many pixels in one side)
 	}
 	
+	//functions used to transfer the logical coordinates to device coordinates
 	int iX(float x){return Math.round(centerX + x/pixelSize);}
 	int iY(float y){return Math.round(centerY - y/pixelSize);}
 	
@@ -413,6 +372,9 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		//quit button
 		quit = new Button("QUIT");
 		quit.addActionListener(this);
+		//start button
+		startgame = new Button("START");
+		startgame.addActionListener(this);
 		
 		this.add(level);
 		this.add(level_data);
@@ -420,6 +382,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		this.add(line_data);
 		this.add(score);
 		this.add(score_data);
+		this.add(startgame);
 		this.add(quit);
 		
 		this.addMouseMotionListener(this);
@@ -458,7 +421,8 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		line.setBounds(PX,iY(rHeight/2 - 2*height - 10),SX , SY);
 		score.setBounds(PX,iY(rHeight/2 - 3*height - 10),SX , SY);
 		
-		quit.setBounds(PX,iY(rHeight/2 - 4*height - 10),SX*2 , SY);
+		quit.setBounds(PX,iY(rHeight/2 - 5*height - 10),SX*2 , SY/2);
+		startgame.setBounds(PX,iY(rHeight/2 - 4*height - 10),SX*2 , SY/2);
 		
 		PX = iX(rWidth/5 + width/2);
 		level_data.setBounds(PX,iY(rHeight/2 - height - 10),SX , SY);
@@ -475,70 +439,73 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		ePY = iY((rHeight/2 - 10)- (height-sqSize)/2);
 		
 
-		switch(next){
-		case 0:{
-			dE.drawLeftZShape(g, Es, ePX, ePY,0);
-			break;
-		}
-		case 1:{
-			dE.drawRightZShape(g, Es, ePX, ePY,0);
-			break;
-		}
-		case 2:{
-			dE.drawLeftLShape(g, Es, ePX, ePY,0);
-			break;
-		}
-		case 3:{
-			dE.drawRightLShape(g, Es, ePX, ePY,0);
-			break;
-		}
-		case 4:{
-			dE.drawCube(g, Es, ePX, ePY,0);
-			break;
-		}
-		case 5:{
-			dE.drawHillShape(g, Es, ePX, ePY,0);
-			break;
-		}
-		case 6:{
-			dE.drawLine(g, Es, ePX, ePY,0);
-			break;
+		if(start){
+			switch(next){
+			case 0:{//left Z shape
+				dE.drawLeftZShape(g, Es, ePX, ePY,0);
+				break;
+			}
+			case 1:{//right Z shape
+				dE.drawRightZShape(g, Es, ePX, ePY,0);
+				break;
+			}
+			case 2:{//left L shape
+				dE.drawLeftLShape(g, Es, ePX, ePY,0);
+				break;
+			}
+			case 3:{//right L shape
+				dE.drawRightLShape(g, Es, ePX, ePY,0);
+				break;
+			}
+			case 4:{//cube
+				dE.drawCube(g, Es, ePX, ePY,0);
+				break;
+			}
+			case 5:{//Hill
+				dE.drawHillShape(g, Es, ePX, ePY,0);
+				break;
+			}
+			case 6:{//Line
+				dE.drawLine(g, Es, ePX, ePY,0);
+				break;
+			}
+			
+			}
+			
+			
+			switch(current){
+			case 0:{//left Z shape
+				dE.drawLeftZShape(g, Es, sqPositionX[row][column], sqPositionY[row][column],shape);
+				break;
+			}
+			case 1:{//Right Z shape
+				dE.drawRightZShape(g, Es, sqPositionX[row][column], sqPositionY[row][column],shape);
+				break;
+			}
+			case 2:{//left L shape
+				dE.drawLeftLShape(g, Es, sqPositionX[row][column], sqPositionY[row][column],shape);
+				break;
+			}
+			case 3:{//right L shape
+				dE.drawRightLShape(g, Es, sqPositionX[row][column], sqPositionY[row][column],shape);
+				break;
+			}
+			case 4:{//cube
+				dE.drawCube(g, Es, sqPositionX[row][column], sqPositionY[row][column],shape);
+				break;
+			}
+			case 5:{//Hill
+				dE.drawHillShape(g, Es, sqPositionX[row][column], sqPositionY[row][column],shape);
+				break;
+			}
+			case 6:{//Line
+				dE.drawLine(g, Es, sqPositionX[row][column], sqPositionY[row][column],shape);
+				break;
+			}
+			
+			}
 		}
 		
-		}
-		
-		
-		switch(current){
-		case 0:{
-			dE.drawLeftZShape(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],shape);
-			break;
-		}
-		case 1:{
-			dE.drawRightZShape(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],shape);
-			break;
-		}
-		case 2:{
-			dE.drawLeftLShape(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],shape);
-			break;
-		}
-		case 3:{
-			dE.drawRightLShape(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],shape);
-			break;
-		}
-		case 4:{
-			dE.drawCube(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],shape);
-			break;
-		}
-		case 5:{
-			dE.drawHillShape(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],shape);
-			break;
-		}
-		case 6:{
-			dE.drawLine(g, Es, sqPositionX[row][collum], sqPositionY[row][collum],shape);
-			break;
-		}
-		
-		}
 	}
 	
 /************************************************************************************************************************
@@ -547,20 +514,405 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
+/****************************************************************************************************
+ * Left Click
+ * ****************************************************************************************************/
 		if(e.getButton() == e.BUTTON1){
-			collum--;
-			if(dE.getLeft() == sqPositionX[0][0]){
-				collum++;
+			if(falling){
+				switch(current){
+				case 0:{// Left Z shape
+					if(Math.abs(shape)%2 == 0){
+						if(column>1){
+							if((stored[row][column-2] == 0) & (stored[row-1][column-1] == 0)){
+								column--;
+								repaint();
+							}
+						}
+						
+					}
+					else{
+						if(column > 1){
+							if((stored[row-1][column-2] == 0) & (stored[row][column-2] == 0) & (stored[row+1][column-1] == 0)){
+								column--;
+								repaint();
+							}
+						}
+						
+					}
+					break;
+				}
+				case 1:{// Right Z shape
+					if(Math.abs(shape)%2 == 0){
+						if(column > 1){
+							if((stored[row-1][column-2] == 0) & (stored[row][column-1] == 0)){
+								column--;
+								repaint();
+							}
+						}
+						
+					}
+					else{
+						if(column > 0){
+							if((stored[row-1][column-1] == 0) & (stored[row][column-2] == 0) & (stored[row+1][column-2] == 0)){
+								column--;
+								repaint();
+							}
+						}
+						
+					}
+					break;
+				}
+				case 2:{//Left L shape
+					if(Math.abs(shape)%4 == 0){
+						if(column > 1){
+							if((stored[row][column-2] == 0) & (stored[row-1][column-2] == 0)){
+								column--;
+								repaint();
+							}
+						}
+						
+					}
+					else if(Math.abs(shape)%4 == 1){
+						if(column > 0){
+							if((stored[row][column-1] == 0) & (stored[row-1][column-1] == 0)& (stored[row+1][column-1] == 0)){
+								column--;
+								repaint();
+							}
+						}
+						
+					}
+					else if(Math.abs(shape)%4 == 2){
+						if(column > 1){
+							if((stored[row][column-2] == 0) & (stored[row+1][column] == 0)){
+								column--;
+								repaint();
+							}
+						}
+						
+					}
+					else if(Math.abs(shape)%4 == 3){
+						if(column > 1){
+							if((stored[row][column-1] == 0) & (stored[row-1][column-1] == 0)& (stored[row+1][column-2] == 0)){
+								column--;
+								repaint();
+							}
+						}
+						
+					}
+					break;
+				}
+				case 3:{//Right L shape
+					if(Math.abs(shape)%4 == 0){
+						if(column > 1){
+							if((stored[row][column-2] == 0) & (stored[row-1][column] == 0)){
+								column--;
+								repaint();
+							}
+						}
+						
+					}
+					else if(Math.abs(shape)%4 == 1){
+						if(column > 0){
+							if((stored[row][column-1] == 0) & (stored[row-1][column-1] == 0)& (stored[row+1][column-1] == 0)){
+								column--;
+								repaint();
+							}
+						}
+						
+					}
+					else if(Math.abs(shape)%4 == 2){
+						if(column > 1){
+							if((stored[row][column-2] == 0) & (stored[row+1][column-2] == 0)){
+								column--;
+								repaint();
+							}
+						}
+						
+					}
+					else if(Math.abs(shape)%4 == 3){
+						if(column > 1){
+							if((stored[row][column-1] == 0) & (stored[row-1][column-2] == 0)& (stored[row+1][column-1] == 0)){
+								column--;
+								repaint();
+							}
+						}
+						
+					}
+					break;
+				}
+				case 4:{//cube
+					if(column > 0){
+						if((stored[row][column-1] == 0) & (stored[row-1][column-1] == 0)){
+							column--;
+							repaint();
+						}
+					}
+					
+					break;
+				}
+				case 5:{//Hill
+					if(Math.abs(shape)%4 == 0){
+						if(column > 1){
+							if((stored[row][column-2] == 0) & (stored[row-1][column-1] == 0)){
+								column--;
+								repaint();
+							}
+						}
+						
+					}
+					else if(Math.abs(shape)%4 == 1){
+						if(column > 0){
+							if((stored[row][column-1] == 0) & (stored[row-1][column-1] == 0)& (stored[row+1][column-1] == 0)){
+								column--;
+								repaint();
+							}
+						}
+						
+					}
+					else if(Math.abs(shape)%4 == 2){
+						if(column > 1){
+							if((stored[row][column-2] == 0) & (stored[row+1][column-1] == 0)){
+								column--;
+								repaint();
+							}
+						}
+						
+					}
+					else if(Math.abs(shape)%4 == 3){
+						if(column > 1){
+							if((stored[row][column-2] == 0) & (stored[row-1][column-1] == 0)& (stored[row+1][column-1] == 0)){
+								column--;
+								repaint();
+							}
+						}
+						
+					}
+					break;
+				}
+				case 6:{//Line
+					if(Math.abs(shape%2) == 0){
+						if(row > 1){
+							if((stored[row][column-2] == 0)){
+								column--;
+								repaint();
+							}
+						}
+						
+					}
+					else{
+						if(column > 0){
+							if((stored[row][column-1] == 0) & (stored[row-1][column-1] == 0)& (stored[row+1][column-1] == 0)& (stored[row+2][column-1] == 0)){
+								column--;
+								repaint();
+							}
+						}
+						
+					}
+					break;
+				}
+				}
 			}
-			repaint();
+			
 		}
 		
+/****************************************************************************************************
+ * Right click
+ * ********************************************************************************************************/
+		
 		else if(e.getButton() == e.BUTTON3){
-			collum++;
-			if(dE.getRight() == sqPositionX[0][9]){
-				collum--;
+			if(falling){
+				switch(current){
+				case 0:{// Left Z shape
+					if(Math.abs(shape)%2 == 0){
+						if(column < 8){
+							if((stored[row][column+1] == 0) & (stored[row-1][column+2] == 0)){
+								column++;
+								repaint();
+							}
+						}
+						
+					}
+					else{
+						if(column < 9){
+							if((stored[row-1][column] == 0) & (stored[row][column+1] == 0) & (stored[row+1][column+1] == 0)){
+								column++;
+								repaint();
+							}
+						}
+						
+					}
+					break;
+				}
+				case 1:{// Right Z shape
+					if(Math.abs(shape)%2 == 0){
+						if(column < 8){
+							if((stored[row-1][column+1] == 0) & (stored[row][column+2] == 0)){
+								column++;
+								repaint();
+							}
+						}
+						
+					}
+					else{
+						if(column < 9){
+							if((stored[row-1][column+1] == 0) & (stored[row][column+1] == 0) & (stored[row+1][column] == 0)){
+								column++;
+								repaint();
+							}
+						}
+						
+					}
+					break;
+				}
+				case 2:{//Left L shape
+					if(Math.abs(shape)%4 == 0){
+						if(column < 8){
+							if((stored[row][column+2] == 0) & (stored[row-1][column] == 0)){
+								column++;
+								repaint();
+							}
+						}
+						
+					}
+					else if(Math.abs(shape)%4 == 1){
+						if((stored[row][column+1] == 0) & (stored[row-1][column+2] == 0)& (stored[row+1][column+1] == 0)&(column < 8)){
+							column++;
+							repaint();
+						}
+					}
+					else if(Math.abs(shape)%4 == 2){
+						if(column < 8){
+							if((stored[row][column+2] == 0) & (stored[row+1][column+2] == 0)){
+								column++;
+								repaint();
+							}
+						}
+						
+					}
+					else if(Math.abs(shape)%4 == 3){
+						if(column < 9){
+							if((stored[row][column+1] == 0) & (stored[row-1][column+1] == 0)& (stored[row+1][column+1] == 0)){
+								column++;
+								repaint();
+							}
+						}
+						
+					}
+					break;
+				}
+				case 3:{//Right L shape
+					if(Math.abs(shape)%4 == 0){
+						if(column < 8){
+							if((stored[row][column+2] == 0) & (stored[row-1][column+2] == 0)){
+								column++;
+								repaint();
+							}
+						}
+						
+					}
+					else if(Math.abs(shape)%4 == 1){
+						if(column < 8){
+							if((stored[row][column+1] == 0) & (stored[row-1][column+1] == 0)& (stored[row+1][column+2] == 0)){
+								column++;
+								repaint();
+							}
+						}
+						
+					}
+					else if(Math.abs(shape)%4 == 2){
+						if(column < 8){
+							if((stored[row][column+2] == 0) & (stored[row+1][column] == 0)){
+								column++;
+								repaint();
+							}
+						}
+						
+					}
+					else if(Math.abs(shape)%4 == 3){
+						if(column < 9){
+							if((stored[row][column+1] == 0) & (stored[row-1][column+1] == 0)& (stored[row+1][column+1] == 0)){
+								column++;
+								repaint();
+							}	
+						}
+						
+					}
+					break;
+				}
+				case 4:{//cube
+					if(column < 8){
+						if((stored[row][column+2] == 0) & (stored[row-1][column+2] == 0)){
+							column++;
+							repaint();
+						}
+					}
+					
+					break;
+				}
+				case 5:{//Hill
+					if(Math.abs(shape)%4 == 0){
+						if(column < 8){
+							if((stored[row][column+2] == 0) & (stored[row-1][column+1] == 0)){
+								column++;
+								repaint();
+							}
+						}
+						
+					}
+					else if(Math.abs(shape)%4 == 1){
+						if(column < 8){
+							if((stored[row][column+2] == 0) & (stored[row-1][column+1] == 0)& (stored[row+1][column+1] == 0)){
+								column++;
+								repaint();
+							}
+						}
+						
+					}
+					else if(Math.abs(shape)%4 == 2){
+						if(column < 8){
+							if((stored[row][column+2] == 0) & (stored[row+1][column+1] == 0)){
+								column++;
+								repaint();
+							}
+						}
+						
+					}
+					else if(Math.abs(shape)%4 == 3){
+						if(column < 9){
+							if((stored[row][column+1] == 0) & (stored[row-1][column+1] == 0)& (stored[row+1][column+1] == 0)){
+								column++;
+								repaint();
+							}
+						}
+						
+					}
+					break;
+				}
+				case 6:{//Line
+					if(Math.abs(shape%2) == 0){
+						if(row < 7){
+							if((stored[row][column+3] == 0)){
+								column++;
+								repaint();
+							}
+						}
+						
+					}
+					else{
+						if(column < 9){
+							if((stored[row][column+1] == 0) & (stored[row-1][column+1] == 0)& (stored[row+1][column+1] == 0)& (stored[row+2][column+1] == 0)){
+								column++;
+								repaint();
+							}
+						}
+						
+					}
+					break;
+				}
+				
+				}
+				
 			}
-			repaint();
 		}
 	}
 
@@ -594,6 +946,9 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		if(e.getSource() == quit){
 			System.exit(0);
 		}
+		else if(e.getSource() == startgame){
+			start = true;
+		}
 	}
 
 	@Override
@@ -609,6 +964,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		boolean inside = false;
 		Mx = e.getX();
 		My = e.getY();
+		
 		
 		Graphics g = getGraphics();
 		if(Mx>=sqPositionX[0][0] & Mx<=sqPositionX[19][9]+Es){
@@ -637,160 +993,375 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		
 	}
 	
+/****************************************************************************************************
+ * Wheel Move
+ * ****************************************************************************************************/
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		// TODO Auto-generated method stub
+		
+		/********************************
+		 * rotate counter clockwise
+		 * *************************************/
 		if(e.getWheelRotation() == 1){
 			if(falling){
-				shape--;
 				switch(current){
+				
+				/************* Left Z shape*******************************/
 				case 0:{
-					if(shape%2 == 0){
-						if(row <= 18){
-							repaint();
+					if(Math.abs(shape)%2 == 0){
+						if(row<19){
+							if((stored[row+1][column]==0) &(stored[row-1][column-1]==0)){
+								shape++;
+								repaint();
+							}
 						}
 					}
 					else{
-						repaint();
+						if(column<9){
+							if((stored[row-1][column]==0) &(stored[row-1][column+1]==0)){
+								shape++;
+								repaint();
+							}
+						}
 					}
 					break;
 				}
+				
+				/************* Right Z shape******************************/
 				case 1:{
-					if(shape%2 == 0){
-						if(row <= 18){
-							repaint();
+					if(Math.abs(shape)%2 == 0){
+						if(row < 19){
+							if((stored[row][column-1]==0) &(stored[row+1][column-1]==0)){
+								shape++;
+								repaint();
+							}
 						}
 					}
 					else{
-						repaint();
+						if(column<9){
+							if((stored[row][column+1]==0) &(stored[row-1][column-1]==0)){
+								shape++;
+								repaint();
+							}
+						}
 					}
 					break;
 				}
+				
+				/*************** Left L shape**************************/
 				case 2:{
-					if(shape%4 == 0){
-						if(row <= 18){
+					if(Math.abs(shape)%4 == 0){
+						if(row<19){
+							if((stored[row-1][column] == 0) & (stored[row+1][column] == 0) & (stored[row-1][column+1] == 0)){
+								shape++;
+								repaint();
+							}
+						}
+					}
+					else if(Math.abs(shape)%4 == 1){
+						if(column > 0){
+							if((stored[row][column+1] == 0) & (stored[row][column-1] == 0) & (stored[row-1][column+1] == 0)){
+								shape++;
+								repaint();
+							}
+						}
+					}
+					else if(Math.abs(shape)%4 == 2){
+						if((stored[row-1][column] == 0) & (stored[row+1][column] == 0) & (stored[row+1][column-1] == 0)){
+							shape++;
 							repaint();
 						}
 					}
-					else{
-						repaint();
+					else if(Math.abs(shape)%4 == 3){
+						if(column<9){
+							if((stored[row][column+1] == 0) & (stored[row][column-1] == 0) & (stored[row-1][column-1] == 0)){
+								shape++;
+								repaint();
+							}
+						}
 					}
 					break;
 				}
+				
+				/************* Right L shape**************************/
 				case 3:{
-					if(shape%4 == 0){
-						if(row <= 18){
+					if(Math.abs(shape)%4 == 0){
+						if(row<19){
+							if((stored[row-1][column] == 0) & (stored[row+1][column] == 0) & (stored[row+1][column+1] == 0)){
+								shape++;
+								repaint();
+							}
+						}
+					}
+					else if(Math.abs(shape)%4 == 1){
+						if(column > 0){
+							if((stored[row][column+1] == 0) & (stored[row][column-1] == 0) & (stored[row+1][column-1] == 0)){
+								shape++;
+								repaint();
+							}
+						}
+					}
+					else if(Math.abs(shape)%4 == 2){
+						if((stored[row+1][column] == 0) & (stored[row-1][column] == 0) & (stored[row-1][column-1] == 0)){
+							shape++;
 							repaint();
 						}
 					}
-					else{
-						repaint();
+					else if(Math.abs(shape)%4 == 3){
+						if(column<9){
+							if((stored[row][column-1] == 0) & (stored[row][column+1] == 0) & (stored[row-1][column+1] == 0)){
+								shape++;
+								repaint();
+							}
+						}
 					}
 					break;
 				}
+				
+				/*********** Cube **********************/
 				case 4:{
-					repaint();
 					break;
 				}
+				
+				/**************** Hill shape *****************************/
 				case 5:{
-					if(shape%4 == 0){
-						if(row <= 18){
+					if(Math.abs(shape)%4 == 0){
+						if(row < 19){
+							if(stored[row+1][column] == 0){
+								shape++;
+								repaint();
+							}
+						}
+					}
+					else if(Math.abs(shape)%4 == 1){
+						if(column>0){
+							if(stored[row][column-1] == 0){
+								shape++;
+								repaint();
+							}
+						}
+					}
+					else if(Math.abs(shape)%4 == 2){
+						if(stored[row-1][column] == 0){
+							shape++;
 							repaint();
 						}
 					}
-					else{
-						repaint();
+					else if(Math.abs(shape)%4 == 3){
+						if(column<9){
+							if(stored[row][column+1] == 0){
+								shape++;
+								repaint();
+							}
+						}
 					}
 					break;
 				}
+				
+				/*************** Line *****************************/
 				case 6:{
-					if(shape%2 == 0){
-						if(row <= 17){
-							repaint();
+					if(Math.abs(shape)%2 == 0){
+						if(row < 18){
+							if((stored[row-1][column] == 0) & (stored[row+1][column] == 0) & (stored[row+2][column] == 0)){
+								shape++;
+								repaint();
+							}
 						}
 					}
 					else{
-						repaint();
+						if((column>0) & (column<8)){
+							if((stored[row][column-1] == 0) & (stored[row][column+1] == 0) & (stored[row][column+2] == 0)){
+								shape++;
+								repaint();
+							}
+						}
 					}
 					break;
 				}		
 				}
 			}
 		}
+		
+		/***********************************************
+		 * rotate clockwise
+		 * *****************/
 		else if(e.getWheelRotation() == -1){
 			if(falling){
-				shape++;
 				switch(current){
+				
+				/************* Left Z shape*******************************/
 				case 0:{
-					if(shape%2 == 0){
-						if(row <= 18){
-							repaint();
+					if(Math.abs(shape)%2 == 0){
+						if(row<19){
+							if((stored[row+1][column]==0) &(stored[row-1][column-1]==0)){
+								shape--;
+								repaint();
+							}
 						}
 					}
 					else{
-						repaint();
+						if(column<9){
+							if((stored[row-1][column]==0) &(stored[row-1][column+1]==0)){
+								shape--;
+								repaint();
+							}
+						}
 					}
 					break;
 				}
+				
+				/************* Right Z shape******************************/
 				case 1:{
-					if(shape%2 == 0){
-						if(row <= 18){
-							repaint();
+					if(Math.abs(shape)%2 == 0){
+						if(row < 19){
+							if((stored[row][column-1]==0) &(stored[row+1][column-1]==0)){
+								shape--;
+								repaint();
+							}
 						}
 					}
 					else{
-						repaint();
+						if(column<9){
+							if((stored[row][column+1]==0) &(stored[row-1][column-1]==0)){
+								shape--;
+								repaint();
+							}
+						}
 					}
 					break;
 				}
+				
+				/*************** Left L shape**************************/
 				case 2:{
-					if(shape%4 == 0){
-						if(row <= 18){
+					if(Math.abs(shape)%4 == 0){
+						if(row<19){
+							if((stored[row-1][column] == 0) & (stored[row+1][column] == 0) & (stored[row+1][column-1] == 0)){
+								shape--;
+								repaint();
+							}
+						}
+					}
+					else if(Math.abs(shape)%4 == 1){
+						if(column > 0){
+							if((stored[row][column+1] == 0) & (stored[row][column-1] == 0) & (stored[row-1][column-1] == 0)){
+								shape--;
+								repaint();
+							}
+						}
+					}
+					else if(Math.abs(shape)%4 == 2){
+						if((stored[row-1][column+1] == 0) & (stored[row-1][column] == 0) & (stored[row+1][column] == 0)){
+							shape--;
 							repaint();
 						}
 					}
-					else{
-						repaint();
+					else if(Math.abs(shape)%4 == 3){
+						if(column<9){
+							if((stored[row][column-1] == 0) & (stored[row][column+1] == 0) & (stored[row+1][column+1] == 0)){
+								shape--;
+								repaint();
+							}
+						}
 					}
 					break;
 				}
+				
+				/************* Right L shape**************************/
 				case 3:{
-					if(shape%4 == 0){
-						if(row <= 18){
+					if(Math.abs(shape)%4 == 0){
+						if(row<19){
+							if((stored[row-1][column-1] == 0) & (stored[row-1][column] == 0) & (stored[row+1][column] == 0)){
+								shape--;
+								repaint();
+							}
+						}
+					}
+					else if(Math.abs(shape)%4 == 1){
+						if(column > 0){
+							if((stored[row][column-1] == 0) & (stored[row][column+1] == 0) & (stored[row-1][column+1] == 0)){
+								shape--;
+								repaint();
+							}
+						}
+					}
+					else if(Math.abs(shape)%4 == 2){
+						if((stored[row-1][column] == 0) & (stored[row+1][column] == 0) & (stored[row+1][column+1] == 0)){
+							shape--;
 							repaint();
 						}
 					}
-					else{
-						repaint();
+					else if(Math.abs(shape)%4 == 3){
+						if(column<9){
+							if((stored[row][column-1] == 0) & (stored[row][column+1] == 0) & (stored[row+1][column-1] == 0)){
+								shape--;
+								repaint();
+							}
+						}
 					}
 					break;
 				}
+				
+				/*********** Cube **********************/
 				case 4:{
-					repaint();
 					break;
 				}
+				
+				/**************** Hill shape *****************************/
 				case 5:{
-					if(shape%4 == 0){
-						if(row <= 18){
+					if(Math.abs(shape)%4 == 0){
+						if(row < 19){
+							if(stored[row+1][column] == 0){
+								shape--;
+								repaint();
+							}
+						}
+					}
+					else if(Math.abs(shape)%4 == 1){
+						if(column>0){
+							if(stored[row][column-1] == 0){
+								shape--;
+								repaint();
+							}
+						}
+					}
+					else if(Math.abs(shape)%4 == 2){
+						if(stored[row-1][column] == 0){
+							shape--;
 							repaint();
 						}
 					}
-					else{
-						repaint();
+					else if(Math.abs(shape)%4 == 3){
+						if(column<9){
+							if(stored[row][column+1] == 0){
+								shape--;
+								repaint();
+							}
+						}
 					}
 					break;
 				}
+				
+				/*************** Line *****************************/
 				case 6:{
-					if(shape%2 == 0){
-						if(row <= 17){
-							repaint();
+					if(Math.abs(shape)%2 == 0){
+						if(row < 18){
+							if((stored[row-1][column] == 0) & (stored[row+1][column] == 0) & (stored[row+2][column] == 0)){
+								shape--;
+								repaint();
+							}
 						}
 					}
 					else{
-						repaint();
+						if((column>0) & (column<8)){
+							if((stored[row][column-1] == 0) & (stored[row][column+1] == 0) & (stored[row][column+2] == 0)){
+								shape--;
+								repaint();
+							}
+						}
 					}
 					break;
-				}
+				}		
 				}
 			}
 		}
@@ -800,11 +1371,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 /*******************************************************************************************************************************
 * Here are some functions that will be used by mainArea
 * *******************************************************************************************************************/
-	
-	void setShapes(int big, int small){
-		this.current = big;
-		this.next = small;
-	}
+
 
 
 
@@ -1175,18 +1742,23 @@ class drawElements{
 		g.setColor(Color.white);
 		for(int i =0; i< height; i++){
 			for(int j = 0; j< length; j++){
+				g.setColor(Color.white);
+				g.fillRect(Px+j*size, Py+i*size, size+1, size+1);
+				
+			}
+		}
+		
+		for(int i =0; i< height; i++){
+			for(int j = 0; j< length; j++){
 				if(black[i][j] == 1){
 					g.setColor(Color.cyan);
-					g.fillRect(Px+j*size, Py+i*size, size+1, size+1);
+					g.fillRect(Px+j*size, Py+i*size, size, size);
 					g.setColor(Color.black);
-					g.drawRect(Px+j*size, Py+i*size, size+1, size+1);
-				}
-				else{
-					g.setColor(Color.white);
-					g.fillRect(Px+j*size, Py+i*size, size+1, size+1);
+					g.drawRect(Px+j*size, Py+i*size, size, size);
 				}
 			}
-		}	
+		}
+		
 	}
 	
 	void drawString(Graphics g, int size, int Px, int Py, String s){
