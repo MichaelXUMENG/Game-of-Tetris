@@ -28,7 +28,6 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 	static int[][] sqPositionX = new int[20][10]; // store all the device x-coordinates of all the cubes
 	static int[][] sqPositionY = new int[20][10]; // store all the device y-coordinates of all the cubes
 	static boolean[][] stored = new boolean[20][10]; // store the index of cubes which have been occupied
-	static int[] disLine = new int[4]; // used to store the line# of a full line
 
 	static drawElements dE = new drawElements( );
 		
@@ -356,7 +355,6 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 								}
 							}
 							
-							
 							row++;
 							gT.repaint();
 						}
@@ -369,7 +367,6 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				/*************************************************************************************
 				 * Start to check if there are rows full
 				 * ************************************************************************************/
-				gT.repaint();
 				
 				
 			}
@@ -1425,14 +1422,15 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 
 	public static void lineDis(int max, int min){
 		int lineNum = 0;
-		for(int i = max; i<=min; i--){
+		int[] disLine = new int[4]; // used to store the line# of a full line
+		for(int i = 19; i> min-1; i--){
 			if(stored[i][0] && stored[i][1] && stored[i][2] && stored[i][3] && stored[i][4] && stored[i][5] && stored[i][6] && stored[i][7] && stored[i][8] && stored[i][9]){
 				disLine[lineNum] = i;
 				lineNum++;
 			}
 		}
 		
-		for(int k = 0; k<lineNum; k++){
+		for(int k = lineNum; k>=0; k--){
 			for(int j = disLine[k]; j>0; j--){
 				for(int t = 0; t<10; t++){
 					stored[j][t] = stored[j-1][t];
@@ -1458,12 +1456,10 @@ class drawElements{
  * This means that any shape is drawn from bottom, which could result in beyond the top of main area;
  * not the bottom of the main area!!!
 */
-	int leftMost, rightMost, bottom;
 	
 	void drawLine(Graphics g, int size, int Px, int Py, int index){
 		switch(index){
 		case 0: {
-			leftMost = Px; rightMost = Px + 3*size; bottom = Py;
 			g.setColor(Color.black);
 			for(int i = 0; i<3; i++){
 				g.drawRect(Px+i*size, Py, size, size);
@@ -1482,7 +1478,6 @@ class drawElements{
 			break;
 		}
 		case 1:{
-			leftMost = Px; rightMost = Px; bottom = Py+3*size;
 			g.setColor(Color.black);
 			for(int i = 0; i<3; i++){
 				g.drawRect(Px, Py-i*size, size, size);
@@ -1506,7 +1501,6 @@ class drawElements{
 	}
 	
 	void drawCube(Graphics g, int size, int Px, int Py, int index){
-		leftMost = Px; rightMost = Px+size; bottom = Py+size;
 		g.setColor(Color.black);
 		for(int i = 0; i<2; i++){
 			for(int j = 0; j<2; j++)
@@ -1522,7 +1516,6 @@ class drawElements{
 	void drawRightLShape(Graphics g, int size, int Px, int Py, int index){
 		switch(index){
 		case 0:{
-			leftMost = Px-size; rightMost = Px + size; bottom = Py;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px-size, Py, size, size);
@@ -1537,7 +1530,6 @@ class drawElements{
 			break;
 		}
 		case 1:{
-			leftMost = Px; rightMost = Px + size; bottom = Py+size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px, Py-size, size, size);
@@ -1552,7 +1544,6 @@ class drawElements{
 			break;
 		}
 		case 2:{
-			leftMost = Px-size; rightMost = Px + size; bottom = Py+size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px+size, Py, size, size);
@@ -1567,7 +1558,6 @@ class drawElements{
 			break;
 		}
 		case 3:{
-			leftMost = Px-size; rightMost = Px; bottom = Py+size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px, Py+size, size, size);
@@ -1589,7 +1579,6 @@ class drawElements{
 	void drawLeftLShape(Graphics g, int size, int Px, int Py, int index){
 		switch(index){
 		case 0:{
-			leftMost = Px-size; rightMost = Px + size; bottom = Py;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px+size, Py, size, size);
@@ -1604,7 +1593,6 @@ class drawElements{
 			break;
 		}
 		case 1:{
-			leftMost = Px; rightMost = Px + size; bottom = Py+size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px, Py+size, size, size);
@@ -1619,7 +1607,6 @@ class drawElements{
 			break;
 		}
 		case 2:{
-			leftMost = Px-size; rightMost = Px + size; bottom = Py+size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px-size, Py, size, size);
@@ -1634,7 +1621,6 @@ class drawElements{
 			break;
 		}
 		case 3:{
-			leftMost = Px-size; rightMost = Px; bottom = Py+size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px, Py-size, size, size);
@@ -1656,7 +1642,6 @@ class drawElements{
 	void drawLeftZShape(Graphics g, int size, int Px, int Py, int index){
 		switch(index){
 		case 0:{
-			leftMost = Px-size; rightMost = Px +size; bottom = Py;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px-size, Py, size, size);
@@ -1671,7 +1656,6 @@ class drawElements{
 			break;
 		}
 		case 1:{
-			leftMost = Px-size; rightMost = Px; bottom = Py+size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px, Py+size, size, size);
@@ -1692,7 +1676,6 @@ class drawElements{
 	void drawRightZShape(Graphics g, int size, int Px, int Py, int index){
 		switch(index){
 		case 0:{
-			leftMost = Px-size; rightMost = Px + size; bottom = Py;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px+size, Py, size, size);
@@ -1707,7 +1690,6 @@ class drawElements{
 			break;
 		}
 		case 1:{
-			leftMost = Px-size; rightMost = Px; bottom = Py+size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px, Py-size, size, size);
@@ -1729,7 +1711,6 @@ class drawElements{
 	void drawHillShape(Graphics g, int size, int Px, int Py, int index){
 		switch(index){
 		case 0:{
-			leftMost = Px-size; rightMost = Px + size; bottom = Py;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px +size, Py, size, size);
@@ -1744,7 +1725,6 @@ class drawElements{
 			break;
 		}
 		case 1:{
-			leftMost = Px; rightMost = Px + size; bottom = Py+size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px, Py-size, size, size);
@@ -1759,7 +1739,6 @@ class drawElements{
 			break;
 		}
 		case 2:{
-			leftMost = Px-size; rightMost = Px + size; bottom = Py+size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px +size, Py, size, size);
@@ -1774,7 +1753,6 @@ class drawElements{
 			break;
 		}
 		case 3:{
-			leftMost = Px-size; rightMost = Px; bottom = Py+size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px, Py-size, size, size);
@@ -1833,13 +1811,4 @@ class drawElements{
 		
 	}
 	
-	int getLeft(){
-		return leftMost;
-	}
-	int getRight(){
-		return rightMost;
-	}
-	int getBottom(){
-		return bottom;
-	}
 } 
