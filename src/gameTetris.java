@@ -28,6 +28,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 	static int[][] sqPositionX = new int[20][10]; // store all the device x-coordinates of all the cubes
 	static int[][] sqPositionY = new int[20][10]; // store all the device y-coordinates of all the cubes
 	static boolean[][] stored = new boolean[20][10]; // store the index of cubes which have been occupied
+	static int[] disLine = new int[4]; // used to store the line# of a full line
 
 	static drawElements dE = new drawElements( );
 		
@@ -130,179 +131,215 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 							e.printStackTrace();
 						}
 						
-						/********** Check if the shape hit the bottom **************************/
+						/********** Check if the shape hit the bottom and stop!! **************************/
 						
 						if(falling){
 							if(current == 0){ // left Z shape
-								if(Math.abs(shape)%2 == 0){
-									if((row == 19)||(stored[row+1][column] )||(stored[row+1][column-1] )||(stored[row][column+1] )){
+								if(shape == 0){
+									if((row == 19)||stored[row+1][column]||stored[row+1][column-1]||stored[row][column+1]){
 										stored[row][column] = true;
 										stored[row][column-1] = true;
 										stored[row-1][column] = true;
 										stored[row-1][column+1] = true;
+										
+										lineDis(row, row-1);
 										break;
 									}
 								}
 								else{
-									if((row == 18)||(stored[row+2][column] )||(stored[row+1][column-1] )){
+									if((row == 18)||stored[row+2][column]||stored[row+1][column-1]){
 										stored[row][column] = true;
 										stored[row+1][column] = true;
 										stored[row][column-1] = true;
 										stored[row-1][column-1] = true;
+										
+										lineDis(row+1, row-1);
 										break;
 									}
 								}
 							}
 							else if (current == 1){// Right Z shape
-								if(Math.abs(shape)%2 == 0){
-									if((row == 19)||(stored[row+1][column] )||(stored[row+1][column+1] )||(stored[row][column-1] )){
+								if(shape == 0){
+									if((row == 19)||stored[row+1][column]||stored[row+1][column+1]||stored[row][column-1]){
 										stored[row][column] = true;
 										stored[row][column+1] = true;
 										stored[row-1][column] = true;
 										stored[row-1][column-1] = true;
+										
+										lineDis(row, row-1);
 										break;
 									}
 								}
 								else{
-									if((row == 18)||(stored[row+1][column] )||(stored[row+2][column-1] )){
+									if((row == 18)||stored[row+1][column]|| stored[row+2][column-1]){
 										stored[row][column] = true;
 										stored[row-1][column] = true;
 										stored[row][column-1] = true;
 										stored[row+1][column-1] = true;
+										
+										lineDis(row+1, row-1);
 										break;
 									}
 								}
 							}
 							else if (current == 2){// Left L shape
-								if(Math.abs(shape)%4 == 0){
-									if((row == 19)||(stored[row+1][column] ) || (stored[row+1][column-1] ) || (stored[row+1][column+1] ==true)){
+								if(shape == 0){
+									if((row == 19)||stored[row+1][column] || stored[row+1][column-1] || stored[row+1][column+1]){
 										stored[row][column]=true;
 										stored[row][column+1]=true;
 										stored[row][column-1]=true;
 										stored[row-1][column-1]=true;
+										
+										lineDis(row, row-1);
 										break;
 									}
 								}
-								else if(Math.abs(shape)%4 ==1){
-									if((row == 18)||(stored[row+2][column] ) || (stored[row][column+1] )){
+								else if(shape ==1){
+									if((row == 18)||stored[row+2][column]  || stored[row][column+1]){
 										stored[row][column]=true;
 										stored[row+1][column]=true;
 										stored[row-1][column]=true;
 										stored[row-1][column+1]=true;
+										
+										lineDis(row+1, row-1);
 										break;
 									}
 								}
-								else if(Math.abs(shape)%4 ==2){
-									if((row == 18)||(stored[row+1][column] ) || (stored[row+1][column-1] ) || (stored[row+2][column+1] )){
+								else if(shape ==2){
+									if((row == 18)||stored[row+1][column]  || stored[row+1][column-1]  || stored[row+2][column+1] ){
 										stored[row][column]=true;
 										stored[row][column+1]=true;
 										stored[row][column-1]=true;
 										stored[row+1][column+1]=true;
+										
+										lineDis(row+1, row);
 										break;
 									}
 								}
-								else if (Math.abs(shape)%4 ==3){
-									if((row == 18)||(stored[row+2][column] ) || (stored[row+2][column-1] )){
+								else if (shape ==3){
+									if((row == 18)||stored[row+2][column] ||stored[row+2][column-1]){
 										stored[row][column]=true;
 										stored[row+1][column]=true;
 										stored[row-1][column]=true;
 										stored[row+1][column-1]=true;
+										
+										lineDis(row+1, row-1);
 										break;
 									}
 								}
 							}
 							else if (current == 3){// Right L shape
-								if(Math.abs(shape)%4 == 0){
-									if((row == 19)||(stored[row+1][column] ) || (stored[row+1][column-1] ) || (stored[row+1][column+1] )){
+								if(shape == 0){
+									if((row == 19)||stored[row+1][column]  || stored[row+1][column-1]  || stored[row+1][column+1] ){
 										stored[row][column]=true;
 										stored[row][column+1]=true;
 										stored[row][column-1]=true;
 										stored[row-1][column+1]=true;
+										
+										lineDis(row, row-1);
 										break;
 									}
 								}
-								else if(Math.abs(shape)%4 ==1){
-									if((row == 18)||(stored[row+2][column] ) || (stored[row+2][column+1] )){
+								else if(shape ==1){
+									if((row == 18)||stored[row+2][column] || stored[row+2][column+1] ){
 										stored[row][column]=true;
 										stored[row+1][column]=true;
 										stored[row-1][column]=true;
 										stored[row+1][column+1]=true;
+										
+										lineDis(row+1, row-1);
 										break;
 									}
 								}
-								else if(Math.abs(shape)%4 ==2){
-									if((row == 18)||(stored[row+1][column] ) || (stored[row+2][column-1] ) || (stored[row+1][column+1] )){
+								else if(shape ==2){
+									if((row == 18)||stored[row+1][column] || stored[row+2][column-1] || stored[row+1][column+1]){
 										stored[row][column]=true;
 										stored[row][column+1]=true;
 										stored[row][column-1]=true;
 										stored[row+1][column-1]=true;
+										
+										lineDis(row+1, row);
 										break;
 									}
 								}
-								else if (Math.abs(shape)%4 ==3){
-									if((row == 18)||(stored[row+2][column] ) || (stored[row][column-1] ==true)){
+								else if (shape ==3){
+									if((row == 18)||stored[row+2][column] || stored[row][column-1]){
 										stored[row][column]=true;
 										stored[row+1][column]=true;
 										stored[row-1][column]=true;
 										stored[row-1][column-1]=true;
+										
+										lineDis(row+1, row-1);
 										break;
 									}
 								}
 							}
 							else if (current == 4){// cube
-								if((row == 19)||(stored[row+1][column] ) || (stored[row+1][column+1] )){
+								if((row == 19)||stored[row+1][column] || stored[row+1][column+1]){
 									stored[row][column] = true;
 									stored[row][column+1] = true;
 									stored[row-1][column] = true;
 									stored[row-1][column+1] = true;
+									
+									lineDis(row, row-1);
 									break;
 								}
 							}
 							else if (current == 5){// Hill
-								if(Math.abs(shape)%4 == 0){
-									if((row == 19)||(stored[row+1][column] ) || (stored[row+1][column-1] ) || (stored[row+1][column+1] )){
+								if(shape == 0){
+									if((row == 19)||stored[row+1][column] || stored[row+1][column-1] || stored[row+1][column+1]){
 										stored[row][column]=true;
 										stored[row][column+1]=true;
 										stored[row][column-1]=true;
 										stored[row-1][column]=true;
+										
+										lineDis(row, row-1);
 										break;
 									}
 								}
-								else if(Math.abs(shape)%4 ==1){
-									if((stored[row+2][column] ) || (stored[row+1][column+1] )||(row == 18)){
+								else if(shape ==1){
+									if((row == 18) || stored[row+2][column] || stored[row+1][column+1]){
 										stored[row][column] = true;
 										stored[row][column+1] = true;
 										stored[row-1][column] = true;
 										stored[row+1][column] = true;
+										
+										lineDis(row+1, row-1);
 										break;
 									}
 								}
-								else if(Math.abs(shape)%4 ==2){
-									if((row == 18)||(stored[row+2][column] ) || (stored[row+1][column-1] ) || (stored[row+1][column+1] )){
+								else if(shape ==2){
+									if((row == 18)|| stored[row+2][column] || stored[row+1][column-1] || stored[row+1][column+1]){
 										stored[row][column]=true;
 										stored[row][column+1]=true;
 										stored[row][column-1]=true;
 										stored[row+1][column]=true;
+										
+										lineDis(row+1, row);
 										break;
 									}
 								}
-								else if (Math.abs(shape)%4 ==3){
-									if((row == 18)||(stored[row+2][column] ) || (stored[row+1][column-1] )){
+								else if (shape ==3){
+									if((row == 18)||stored[row+2][column] || stored[row+1][column-1]){
 										stored[row][column] = true;
 										stored[row][column-1] = true;
 										stored[row-1][column] = true;
 										stored[row+1][column] = true;
+										
+										lineDis(row+1, row-1);
 										break;
 									}
 								}
 							}
 							else if (current == 6){// Line
-								if(Math.abs(shape)%2 == 0){
+								if(shape == 0){
 									if((row == 19)||stored[row+1][column] || stored[row+1][column-1] || stored[row+1][column+1] || stored[row+1][column+2]){
 										stored[row][column] = true;
 										stored[row][column-1] = true;
 										stored[row][column+1] = true;
 										stored[row][column+2] = true;
+										
+										lineDis(row, row);
 										break;
 									}
 								}
@@ -312,6 +349,8 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 										stored[row-1][column] = true;
 										stored[row+1][column] = true;
 										stored[row+2][column] = true;
+										
+										lineDis(row+2, row-1);
 										break;
 									}
 								}
@@ -325,20 +364,18 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 					}
 				} 
 				
+				
+				
 				/*************************************************************************************
 				 * Start to check if there are rows full
 				 * ************************************************************************************/
-				
-				for(int i=19; i>=0; i--){
-					if(stored[i][0] & stored[i][1]){
-						
-					}
-				}
+				gT.repaint();
 				
 				
 			}
 		}
 	}
+	
 	
 	/********* initialize the useful variables *****************/
 	void initial(){ 
@@ -533,9 +570,9 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 			if(falling){
 				switch(current){
 				case 0:{// Left Z shape
-					if(Math.abs(shape)%2 == 0){
+					if(shape == 0){
 						if(column>1){
-							if((stored[row][column-2] == false) && (stored[row-1][column-1] == false)){
+							if(!(stored[row][column-2] ||stored[row-1][column-1] )){
 								column--;
 								repaint();
 							}
@@ -544,7 +581,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 					}
 					else{
 						if(column > 1){
-							if((stored[row-1][column-2] == false) && (stored[row][column-2] == false) && (stored[row+1][column-1] == false)){
+							if(!(stored[row-1][column-2] ||stored[row][column-2] ||stored[row+1][column-1] )){
 								column--;
 								repaint();
 							}
@@ -554,9 +591,9 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 					break;
 				}
 				case 1:{// Right Z shape
-					if(Math.abs(shape)%2 == 0){
+					if(shape == 0){
 						if(column > 1){
-							if((stored[row-1][column-2] == false) && (stored[row][column-1] == false)){
+							if(!(stored[row-1][column-2] ||stored[row][column-1] )){
 								column--;
 								repaint();
 							}
@@ -564,8 +601,8 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 						
 					}
 					else{
-						if(column > 0){
-							if((stored[row-1][column-1] == false) && (stored[row][column-2] == false) && (stored[row+1][column-2] == false)){
+						if(column > 1){
+							if(!(stored[row-1][column-1] ||stored[row][column-2] ||stored[row+1][column-2] )){
 								column--;
 								repaint();
 							}
@@ -575,36 +612,36 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 					break;
 				}
 				case 2:{//Left L shape
-					if(Math.abs(shape)%4 == 0){
+					if(shape == 0){
 						if(column > 1){
-							if((stored[row][column-2] == false) && (stored[row-1][column-2] == false)){
+							if(!(stored[row][column-2] ||stored[row-1][column-2] )){
 								column--;
 								repaint();
 							}
 						}
 						
 					}
-					else if(Math.abs(shape)%4 == 1){
+					else if(shape == 1){
 						if(column > 0){
-							if((stored[row][column-1] == false) && (stored[row-1][column-1] == false)&& (stored[row+1][column-1] == false)){
+							if(!(stored[row][column-1] ||stored[row-1][column-1] ||stored[row+1][column-1] )){
 								column--;
 								repaint();
 							}
 						}
 						
 					}
-					else if(Math.abs(shape)%4 == 2){
+					else if(shape == 2){
 						if(column > 1){
-							if((stored[row][column-2] == false) && (stored[row+1][column] == false)){
+							if(!(stored[row][column-2] ||stored[row+1][column] )){
 								column--;
 								repaint();
 							}
 						}
 						
 					}
-					else if(Math.abs(shape)%4 == 3){
+					else if(shape == 3){
 						if(column > 1){
-							if((stored[row][column-1] == false) && (stored[row-1][column-1] == false)&& (stored[row+1][column-2] == false)){
+							if(!(stored[row][column-1] ||stored[row-1][column-1] ||stored[row+1][column-2] )){
 								column--;
 								repaint();
 							}
@@ -614,36 +651,36 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 					break;
 				}
 				case 3:{//Right L shape
-					if(Math.abs(shape)%4 == 0){
+					if(shape == 0){
 						if(column > 1){
-							if((stored[row][column-2] == false) && (stored[row-1][column] == false)){
+							if(!(stored[row][column-2] ||stored[row-1][column] )){
 								column--;
 								repaint();
 							}
 						}
 						
 					}
-					else if(Math.abs(shape)%4 == 1){
+					else if(shape == 1){
 						if(column > 0){
-							if((stored[row][column-1] == false) && (stored[row-1][column-1] == false)&& (stored[row+1][column-1] == false)){
+							if(!(stored[row][column-1] ||stored[row-1][column-1] ||stored[row+1][column-1] )){
 								column--;
 								repaint();
 							}
 						}
 						
 					}
-					else if(Math.abs(shape)%4 == 2){
+					else if(shape == 2){
 						if(column > 1){
-							if((stored[row][column-2] == false) && (stored[row+1][column-2] == false)){
+							if(!(stored[row][column-2] ||stored[row+1][column-2] )){
 								column--;
 								repaint();
 							}
 						}
 						
 					}
-					else if(Math.abs(shape)%4 == 3){
+					else if(shape == 3){
 						if(column > 1){
-							if((stored[row][column-1] == false) && (stored[row-1][column-2] == false)&& (stored[row+1][column-1] == false)){
+							if(!(stored[row][column-1] ||stored[row-1][column-2] ||stored[row+1][column-1] )){
 								column--;
 								repaint();
 							}
@@ -654,7 +691,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				}
 				case 4:{//cube
 					if(column > 0){
-						if((stored[row][column-1] == false) && (stored[row-1][column-1] == false)){
+						if(!(stored[row][column-1] ||stored[row-1][column-1] )){
 							column--;
 							repaint();
 						}
@@ -663,36 +700,36 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 					break;
 				}
 				case 5:{//Hill
-					if(Math.abs(shape)%4 == 0){
+					if(shape == 0){
 						if(column > 1){
-							if((stored[row][column-2] == false) && (stored[row-1][column-1] == false)){
+							if(!(stored[row][column-2] ||stored[row-1][column-1] )){
 								column--;
 								repaint();
 							}
 						}
 						
 					}
-					else if(Math.abs(shape)%4 == 1){
+					else if(shape == 1){
 						if(column > 0){
-							if((stored[row][column-1] == false) && (stored[row-1][column-1] == false)&& (stored[row+1][column-1] == false)){
+							if(!(stored[row][column-1] ||stored[row-1][column-1] ||stored[row+1][column-1] )){
 								column--;
 								repaint();
 							}
 						}
 						
 					}
-					else if(Math.abs(shape)%4 == 2){
+					else if(shape == 2){
 						if(column > 1){
-							if((stored[row][column-2] == false) && (stored[row+1][column-1] == false)){
+							if(!(stored[row][column-2] ||stored[row+1][column-1] )){
 								column--;
 								repaint();
 							}
 						}
 						
 					}
-					else if(Math.abs(shape)%4 == 3){
+					else if(shape == 3){
 						if(column > 1){
-							if((stored[row][column-2] == false) && (stored[row-1][column-1] == false)&& (stored[row+1][column-1] == false)){
+							if(!(stored[row][column-2] ||stored[row-1][column-1] ||stored[row+1][column-1] )){
 								column--;
 								repaint();
 							}
@@ -702,9 +739,9 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 					break;
 				}
 				case 6:{//Line
-					if(Math.abs(shape%2) == 0){
+					if(Math.abs(shape) == 0){
 						if(row > 1){
-							if((stored[row][column-2] == false)){
+							if(!stored[row][column-2]){
 								column--;
 								repaint();
 							}
@@ -713,7 +750,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 					}
 					else{
 						if(column > 0){
-							if((stored[row][column-1] == false) && (stored[row-1][column-1] == false)&& (stored[row+1][column-1] == false)&& (stored[row+2][column-1] == false)){
+							if(!(stored[row][column-1] ||stored[row-1][column-1] ||stored[row+1][column-1] ||stored[row+2][column-1] )){
 								column--;
 								repaint();
 							}
@@ -735,9 +772,9 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 			if(falling){
 				switch(current){
 				case 0:{// Left Z shape
-					if(Math.abs(shape)%2 == 0){
+					if(shape == 0){
 						if(column < 8){
-							if((stored[row][column+1] == false) && (stored[row-1][column+2] == false)){
+							if(!(stored[row][column+1] ||stored[row-1][column+2] )){
 								column++;
 								repaint();
 							}
@@ -746,7 +783,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 					}
 					else{
 						if(column < 9){
-							if((stored[row-1][column] == false) && (stored[row][column+1] == false) && (stored[row+1][column+1] == false)){
+							if(!(stored[row-1][column] ||stored[row][column+1] ||stored[row+1][column+1] )){
 								column++;
 								repaint();
 							}
@@ -756,9 +793,9 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 					break;
 				}
 				case 1:{// Right Z shape
-					if(Math.abs(shape)%2 == 0){
+					if(shape == 0){
 						if(column < 8){
-							if((stored[row-1][column+1] == false) && (stored[row][column+2] == false)){
+							if(!(stored[row-1][column+1] ||stored[row][column+2] )){
 								column++;
 								repaint();
 							}
@@ -767,7 +804,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 					}
 					else{
 						if(column < 9){
-							if((stored[row-1][column+1] == false) && (stored[row][column+1] == false) && (stored[row+1][column] == false)){
+							if(!(stored[row-1][column+1] ||stored[row][column+1] ||stored[row+1][column] )){
 								column++;
 								repaint();
 							}
@@ -777,33 +814,35 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 					break;
 				}
 				case 2:{//Left L shape
-					if(Math.abs(shape)%4 == 0){
+					if(shape == 0){
 						if(column < 8){
-							if((stored[row][column+2] == false) && (stored[row-1][column] == false)){
+							if(!(stored[row][column+2] ||stored[row-1][column] )){
 								column++;
 								repaint();
 							}
 						}
 						
 					}
-					else if(Math.abs(shape)%4 == 1){
-						if((stored[row][column+1] == false) && (stored[row-1][column+2] == false)&& (stored[row+1][column+1] == false)&&(column < 8)){
-							column++;
-							repaint();
+					else if(shape == 1){
+						if(column < 8){
+							if(!(stored[row][column+1] ||stored[row-1][column+2] ||stored[row+1][column+1])){
+								column++;
+								repaint();
+							}
 						}
 					}
-					else if(Math.abs(shape)%4 == 2){
+					else if(shape == 2){
 						if(column < 8){
-							if((stored[row][column+2] == false) && (stored[row+1][column+2] == false)){
+							if(!(stored[row][column+2] ||stored[row+1][column+2] )){
 								column++;
 								repaint();
 							}
 						}
 						
 					}
-					else if(Math.abs(shape)%4 == 3){
+					else if(shape == 3){
 						if(column < 9){
-							if((stored[row][column+1] == false) && (stored[row-1][column+1] == false)&& (stored[row+1][column+1] == false)){
+							if(!(stored[row][column+1] ||stored[row-1][column+1] ||stored[row+1][column+1] )){
 								column++;
 								repaint();
 							}
@@ -813,36 +852,36 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 					break;
 				}
 				case 3:{//Right L shape
-					if(Math.abs(shape)%4 == 0){
+					if(shape == 0){
 						if(column < 8){
-							if((stored[row][column+2] == false) && (stored[row-1][column+2] == false)){
+							if(!(stored[row][column+2] ||stored[row-1][column+2] )){
 								column++;
 								repaint();
 							}
 						}
 						
 					}
-					else if(Math.abs(shape)%4 == 1){
+					else if(shape == 1){
 						if(column < 8){
-							if((stored[row][column+1] == false) && (stored[row-1][column+1] == false)&& (stored[row+1][column+2] == false)){
+							if(!(stored[row][column+1] ||stored[row-1][column+1] ||stored[row+1][column+2] )){
 								column++;
 								repaint();
 							}
 						}
 						
 					}
-					else if(Math.abs(shape)%4 == 2){
+					else if(shape == 2){
 						if(column < 8){
-							if((stored[row][column+2] == false) && (stored[row+1][column] == false)){
+							if(!(stored[row][column+2] ||stored[row+1][column] )){
 								column++;
 								repaint();
 							}
 						}
 						
 					}
-					else if(Math.abs(shape)%4 == 3){
+					else if(shape == 3){
 						if(column < 9){
-							if((stored[row][column+1] == false) && (stored[row-1][column+1] == false)&& (stored[row+1][column+1] == false)){
+							if(!(stored[row][column+1] ||stored[row-1][column+1] ||stored[row+1][column+1] )){
 								column++;
 								repaint();
 							}	
@@ -853,7 +892,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				}
 				case 4:{//cube
 					if(column < 8){
-						if((stored[row][column+2] == false) && (stored[row-1][column+2] == false)){
+						if(!(stored[row][column+2] ||stored[row-1][column+2] )){
 							column++;
 							repaint();
 						}
@@ -862,36 +901,36 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 					break;
 				}
 				case 5:{//Hill
-					if(Math.abs(shape)%4 == 0){
+					if(shape == 0){
 						if(column < 8){
-							if((stored[row][column+2] == false) && (stored[row-1][column+1] == false)){
+							if(!(stored[row][column+2] ||stored[row-1][column+1] )){
 								column++;
 								repaint();
 							}
 						}
 						
 					}
-					else if(Math.abs(shape)%4 == 1){
+					else if(shape == 1){
 						if(column < 8){
-							if((stored[row][column+2] == false) && (stored[row-1][column+1] == false)&& (stored[row+1][column+1] == false)){
+							if(!(stored[row][column+2] ||stored[row-1][column+1] ||stored[row+1][column+1] )){
 								column++;
 								repaint();
 							}
 						}
 						
 					}
-					else if(Math.abs(shape)%4 == 2){
+					else if(shape == 2){
 						if(column < 8){
-							if((stored[row][column+2] == false) && (stored[row+1][column+1] == false)){
+							if(!(stored[row][column+2] ||stored[row+1][column+1] )){
 								column++;
 								repaint();
 							}
 						}
 						
 					}
-					else if(Math.abs(shape)%4 == 3){
+					else if(shape == 3){
 						if(column < 9){
-							if((stored[row][column+1] == false) && (stored[row-1][column+1] == false)&& (stored[row+1][column+1] == false)){
+							if(!(stored[row][column+1] ||stored[row-1][column+1] ||stored[row+1][column+1] )){
 								column++;
 								repaint();
 							}
@@ -901,9 +940,9 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 					break;
 				}
 				case 6:{//Line
-					if(Math.abs(shape%2) == 0){
-						if(row < 7){
-							if((stored[row][column+3] == false)){
+					if(Math.abs(shape) == 0){
+						if(column < 7){
+							if(!(stored[row][column+3] )){
 								column++;
 								repaint();
 							}
@@ -912,7 +951,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 					}
 					else{
 						if(column < 9){
-							if((stored[row][column+1] == false) && (stored[row-1][column+1] == false)&& (stored[row+1][column+1] == false)&& (stored[row+2][column+1] == false)){
+							if(!(stored[row][column+1] ||stored[row-1][column+1] ||stored[row+1][column+1] ||stored[row+2][column+1] )){
 								column++;
 								repaint();
 							}
@@ -1021,18 +1060,18 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				
 				/************* Left Z shape*******************************/
 				case 0:{
-					if(Math.abs(shape)%2 == 0){
+					if(shape == 0){
 						if(row<19){
-							if((stored[row+1][column]==false) &&(stored[row-1][column-1]==false)){
-								shape++;
+							if(!(stored[row+1][column]||stored[row-1][column-1])){
+								shape = 1;
 								repaint();
 							}
 						}
 					}
 					else{
 						if(column<9){
-							if((stored[row-1][column]==false) &&(stored[row-1][column+1]==false)){
-								shape++;
+							if(!(stored[row-1][column]||stored[row-1][column+1])){
+								shape = 0;
 								repaint();
 							}
 						}
@@ -1042,18 +1081,18 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				
 				/************* Right Z shape******************************/
 				case 1:{
-					if(Math.abs(shape)%2 == 0){
+					if(shape == 0){
 						if(row < 19){
-							if((stored[row][column-1]==false) &&(stored[row+1][column-1]==false)){
-								shape++;
+							if(!(stored[row][column-1]||stored[row+1][column-1])){
+								shape=1;
 								repaint();
 							}
 						}
 					}
 					else{
 						if(column<9){
-							if((stored[row][column+1]==false) &&(stored[row-1][column-1]==false)){
-								shape++;
+							if(!(stored[row][column+1]||stored[row-1][column-1])){
+								shape=0;
 								repaint();
 							}
 						}
@@ -1063,32 +1102,32 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				
 				/*************** Left L shape**************************/
 				case 2:{
-					if(Math.abs(shape)%4 == 0){
+					if(shape == 0){
 						if(row<19){
-							if((stored[row-1][column] == false) && (stored[row+1][column] == false) && (stored[row-1][column+1] == false)){
-								shape++;
+							if(!(stored[row-1][column] ||stored[row+1][column] ||stored[row-1][column+1] )){
+								shape=1;
 								repaint();
 							}
 						}
 					}
-					else if(Math.abs(shape)%4 == 1){
+					else if(shape == 1){
 						if(column > 0){
-							if((stored[row][column+1] == false) && (stored[row][column-1] == false) && (stored[row-1][column+1] == false)){
-								shape++;
+							if(!(stored[row][column+1] ||stored[row][column-1] ||stored[row-1][column+1] )){
+								shape=2;
 								repaint();
 							}
 						}
 					}
-					else if(Math.abs(shape)%4 == 2){
-						if((stored[row-1][column] == false) && (stored[row+1][column] == false) && (stored[row+1][column-1] == false)){
-							shape++;
+					else if(shape == 2){
+						if(!(stored[row-1][column] ||stored[row+1][column] ||stored[row+1][column-1] )){
+							shape=3;
 							repaint();
 						}
 					}
-					else if(Math.abs(shape)%4 == 3){
+					else if(shape == 3){
 						if(column<9){
-							if((stored[row][column+1] == false) && (stored[row][column-1] == false) && (stored[row-1][column-1] == false)){
-								shape++;
+							if(!(stored[row][column+1] ||stored[row][column-1] ||stored[row-1][column-1] )){
+								shape=0;
 								repaint();
 							}
 						}
@@ -1098,32 +1137,32 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				
 				/************* Right L shape**************************/
 				case 3:{
-					if(Math.abs(shape)%4 == 0){
+					if(shape == 0){
 						if(row<19){
-							if((stored[row-1][column] == false) && (stored[row+1][column] == false) && (stored[row+1][column+1] == false)){
-								shape++;
+							if(!(stored[row-1][column] ||stored[row+1][column] ||stored[row+1][column+1] )){
+								shape=1;
 								repaint();
 							}
 						}
 					}
-					else if(Math.abs(shape)%4 == 1){
+					else if(shape == 1){
 						if(column > 0){
-							if((stored[row][column+1] == false) && (stored[row][column-1] == false) && (stored[row+1][column-1] == false)){
-								shape++;
+							if(!(stored[row][column+1] ||stored[row][column-1] ||stored[row+1][column-1] )){
+								shape=2;
 								repaint();
 							}
 						}
 					}
-					else if(Math.abs(shape)%4 == 2){
-						if((stored[row+1][column] == false) && (stored[row-1][column] == false) && (stored[row-1][column-1] == false)){
-							shape++;
+					else if(shape == 2){
+						if(!(stored[row+1][column] ||stored[row-1][column] ||stored[row-1][column-1] )){
+							shape=3;
 							repaint();
 						}
 					}
-					else if(Math.abs(shape)%4 == 3){
+					else if(shape == 3){
 						if(column<9){
-							if((stored[row][column-1] == false) && (stored[row][column+1] == false) && (stored[row-1][column+1] == false)){
-								shape++;
+							if(!(stored[row][column-1] ||stored[row][column+1] ||stored[row-1][column+1] )){
+								shape=0;
 								repaint();
 							}
 						}
@@ -1138,32 +1177,32 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				
 				/**************** Hill shape *****************************/
 				case 5:{
-					if(Math.abs(shape)%4 == 0){
+					if(shape == 0){
 						if(row < 19){
-							if(stored[row+1][column] == false){
-								shape++;
+							if(!stored[row+1][column] ){
+								shape=1;
 								repaint();
 							}
 						}
 					}
-					else if(Math.abs(shape)%4 == 1){
+					else if(shape == 1){
 						if(column>0){
-							if(stored[row][column-1] == false){
-								shape++;
+							if(!stored[row][column-1] ){
+								shape=2;
 								repaint();
 							}
 						}
 					}
-					else if(Math.abs(shape)%4 == 2){
-						if(stored[row-1][column] == false){
-							shape++;
+					else if(shape == 2){
+						if(!stored[row-1][column] ){
+							shape=3;
 							repaint();
 						}
 					}
-					else if(Math.abs(shape)%4 == 3){
+					else if(shape == 3){
 						if(column<9){
-							if(stored[row][column+1] == false){
-								shape++;
+							if(!stored[row][column+1] ){
+								shape=0;
 								repaint();
 							}
 						}
@@ -1173,18 +1212,18 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				
 				/*************** Line *****************************/
 				case 6:{
-					if(Math.abs(shape)%2 == 0){
+					if(shape == 0){
 						if(row < 18){
-							if((stored[row-1][column] == false) && (stored[row+1][column] == false) && (stored[row+2][column] == false)){
-								shape++;
+							if(!(stored[row-1][column] ||stored[row+1][column] ||stored[row+2][column] )){
+								shape=1;
 								repaint();
 							}
 						}
 					}
 					else{
 						if((column>0) && (column<8)){
-							if((stored[row][column-1] == false) && (stored[row][column+1] == false) && (stored[row][column+2] == false)){
-								shape++;
+							if(!(stored[row][column-1] ||stored[row][column+1] ||stored[row][column+2] )){
+								shape=0;
 								repaint();
 							}
 						}
@@ -1204,18 +1243,18 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				
 				/************* Left Z shape*******************************/
 				case 0:{
-					if(Math.abs(shape)%2 == 0){
+					if(shape == 0){
 						if(row<19){
-							if((stored[row+1][column]==false) &&(stored[row-1][column-1]==false)){
-								shape--;
+							if(!(stored[row+1][column]||stored[row-1][column-1])){
+								shape=1;
 								repaint();
 							}
 						}
 					}
 					else{
 						if(column<9){
-							if((stored[row-1][column]==false) &&(stored[row-1][column+1]==false)){
-								shape--;
+							if(!(stored[row-1][column]||stored[row-1][column+1])){
+								shape=0;
 								repaint();
 							}
 						}
@@ -1225,18 +1264,18 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				
 				/************* Right Z shape******************************/
 				case 1:{
-					if(Math.abs(shape)%2 == 0){
+					if(shape == 0){
 						if(row < 19){
-							if((stored[row][column-1]==false) &&(stored[row+1][column-1]==false)){
-								shape--;
+							if(!(stored[row][column-1]||stored[row+1][column-1])){
+								shape=1;
 								repaint();
 							}
 						}
 					}
 					else{
 						if(column<9){
-							if((stored[row][column+1]==false) &&(stored[row-1][column-1]==false)){
-								shape--;
+							if(!(stored[row][column+1]||stored[row-1][column-1])){
+								shape=0;
 								repaint();
 							}
 						}
@@ -1246,32 +1285,32 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				
 				/*************** Left L shape**************************/
 				case 2:{
-					if(Math.abs(shape)%4 == 0){
+					if(shape == 0){
 						if(row<19){
-							if((stored[row-1][column] == false) && (stored[row+1][column] == false) && (stored[row+1][column-1] == false)){
-								shape--;
+							if(!(stored[row-1][column] ||stored[row+1][column] ||stored[row+1][column-1] )){
+								shape=3;
 								repaint();
 							}
 						}
 					}
-					else if(Math.abs(shape)%4 == 1){
+					else if(shape == 1){
 						if(column > 0){
-							if((stored[row][column+1] == false) && (stored[row][column-1] == false) && (stored[row-1][column-1] == false)){
-								shape--;
+							if(!(stored[row][column+1] ||stored[row][column-1] ||stored[row-1][column-1] )){
+								shape=0;
 								repaint();
 							}
 						}
 					}
-					else if(Math.abs(shape)%4 == 2){
-						if((stored[row-1][column+1] == false) && (stored[row-1][column] == false) && (stored[row+1][column] == false)){
-							shape--;
+					else if(shape == 2){
+						if(!(stored[row-1][column+1] ||stored[row-1][column] ||stored[row+1][column] )){
+							shape=1;
 							repaint();
 						}
 					}
-					else if(Math.abs(shape)%4 == 3){
+					else if(shape == 3){
 						if(column<9){
-							if((stored[row][column-1] == false) && (stored[row][column+1] == false) && (stored[row+1][column+1] == false)){
-								shape--;
+							if(!(stored[row][column-1] ||stored[row][column+1] ||stored[row+1][column+1] )){
+								shape=2;
 								repaint();
 							}
 						}
@@ -1281,32 +1320,32 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				
 				/************* Right L shape**************************/
 				case 3:{
-					if(Math.abs(shape)%4 == 0){
+					if(shape == 0){
 						if(row<19){
-							if((stored[row-1][column-1] == false) && (stored[row-1][column] == false) && (stored[row+1][column] == false)){
-								shape--;
+							if(!(stored[row-1][column-1] ||stored[row-1][column] ||stored[row+1][column] )){
+								shape=3;
 								repaint();
 							}
 						}
 					}
-					else if(Math.abs(shape)%4 == 1){
+					else if(shape == 1){
 						if(column > 0){
-							if((stored[row][column-1] == false) && (stored[row][column+1] == false) && (stored[row-1][column+1] == false)){
-								shape--;
+							if(!(stored[row][column-1] ||stored[row][column+1] ||stored[row-1][column+1] )){
+								shape=0;
 								repaint();
 							}
 						}
 					}
-					else if(Math.abs(shape)%4 == 2){
-						if((stored[row-1][column] == false) && (stored[row+1][column] == false) && (stored[row+1][column+1] == false)){
-							shape--;
+					else if(shape == 2){
+						if(!(stored[row-1][column] ||stored[row+1][column] ||stored[row+1][column+1] )){
+							shape=1;
 							repaint();
 						}
 					}
-					else if(Math.abs(shape)%4 == 3){
+					else if(shape == 3){
 						if(column<9){
-							if((stored[row][column-1] == false) && (stored[row][column+1] == false) && (stored[row+1][column-1] == false)){
-								shape--;
+							if(!(stored[row][column-1] ||stored[row][column+1] ||stored[row+1][column-1] )){
+								shape=2;
 								repaint();
 							}
 						}
@@ -1321,32 +1360,32 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				
 				/**************** Hill shape *****************************/
 				case 5:{
-					if(Math.abs(shape)%4 == 0){
+					if(shape == 0){
 						if(row < 19){
-							if(stored[row+1][column] == false){
-								shape--;
+							if(!stored[row+1][column] ){
+								shape=3;
 								repaint();
 							}
 						}
 					}
-					else if(Math.abs(shape)%4 == 1){
+					else if(shape == 1){
 						if(column>0){
-							if(stored[row][column-1] == false){
-								shape--;
+							if(!stored[row][column-1] ){
+								shape=0;
 								repaint();
 							}
 						}
 					}
-					else if(Math.abs(shape)%4 == 2){
-						if(stored[row-1][column] == false){
-							shape--;
+					else if(shape == 2){
+						if(!stored[row-1][column] ){
+							shape=1;
 							repaint();
 						}
 					}
-					else if(Math.abs(shape)%4 == 3){
+					else if(shape == 3){
 						if(column<9){
-							if(stored[row][column+1] == false){
-								shape--;
+							if(!stored[row][column+1] ){
+								shape=2;
 								repaint();
 							}
 						}
@@ -1356,18 +1395,18 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				
 				/*************** Line *****************************/
 				case 6:{
-					if(Math.abs(shape)%2 == 0){
+					if(shape == 0){
 						if(row < 18){
-							if((stored[row-1][column] == false) && (stored[row+1][column] == false) && (stored[row+2][column] == false)){
-								shape--;
+							if(!(stored[row-1][column] ||stored[row+1][column] ||stored[row+2][column] )){
+								shape=1;
 								repaint();
 							}
 						}
 					}
 					else{
 						if((column>0) && (column<8)){
-							if((stored[row][column-1] == false) && (stored[row][column+1] == false) && (stored[row][column+2] == false)){
-								shape--;
+							if(!(stored[row][column-1] ||stored[row][column+1] ||stored[row][column+2] )){
+								shape=0;
 								repaint();
 							}
 						}
@@ -1384,9 +1423,27 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 * Here are some functions that will be used by mainArea
 * *******************************************************************************************************************/
 
-
-
-
+	public static void lineDis(int max, int min){
+		int lineNum = 0;
+		for(int i = max; i<=min; i--){
+			if(stored[i][0] && stored[i][1] && stored[i][2] && stored[i][3] && stored[i][4] && stored[i][5] && stored[i][6] && stored[i][7] && stored[i][8] && stored[i][9]){
+				disLine[lineNum] = i;
+				lineNum++;
+			}
+		}
+		
+		for(int k = 0; k<lineNum; k++){
+			for(int j = disLine[k]; j>0; j--){
+				for(int t = 0; t<10; t++){
+					stored[j][t] = stored[j-1][t];
+				}
+			}
+			for(int t = 0; t<10; t++){
+				stored[0][t] = false;
+			}			
+			
+		}
+	}
 
 }
 
@@ -1404,9 +1461,7 @@ class drawElements{
 	int leftMost, rightMost, bottom;
 	
 	void drawLine(Graphics g, int size, int Px, int Py, int index){
-		int shape;
-		shape = Math.abs(index)%2;
-		switch(shape){
+		switch(index){
 		case 0: {
 			leftMost = Px; rightMost = Px + 3*size; bottom = Py;
 			g.setColor(Color.black);
@@ -1465,9 +1520,7 @@ class drawElements{
 	}
 	
 	void drawRightLShape(Graphics g, int size, int Px, int Py, int index){
-		int shape;
-		shape = Math.abs(index)%4;
-		switch(shape){
+		switch(index){
 		case 0:{
 			leftMost = Px-size; rightMost = Px + size; bottom = Py;
 			g.setColor(Color.black);
@@ -1534,9 +1587,7 @@ class drawElements{
 	}
 	
 	void drawLeftLShape(Graphics g, int size, int Px, int Py, int index){
-		int shape;
-		shape = Math.abs(index)%4;
-		switch(shape){
+		switch(index){
 		case 0:{
 			leftMost = Px-size; rightMost = Px + size; bottom = Py;
 			g.setColor(Color.black);
@@ -1603,9 +1654,7 @@ class drawElements{
 	}
 	
 	void drawLeftZShape(Graphics g, int size, int Px, int Py, int index){
-		int shape;
-		shape = Math.abs(index)%2;
-		switch(shape){
+		switch(index){
 		case 0:{
 			leftMost = Px-size; rightMost = Px +size; bottom = Py;
 			g.setColor(Color.black);
@@ -1641,9 +1690,7 @@ class drawElements{
 	}
 	
 	void drawRightZShape(Graphics g, int size, int Px, int Py, int index){
-		int shape;
-		shape = Math.abs(index)%2;
-		switch(shape){
+		switch(index){
 		case 0:{
 			leftMost = Px-size; rightMost = Px + size; bottom = Py;
 			g.setColor(Color.black);
@@ -1680,9 +1727,7 @@ class drawElements{
 	}
 	
 	void drawHillShape(Graphics g, int size, int Px, int Py, int index){
-		int shape;
-		shape = Math.abs(index)%4;
-		switch(shape){
+		switch(index){
 		case 0:{
 			leftMost = Px-size; rightMost = Px + size; bottom = Py;
 			g.setColor(Color.black);
