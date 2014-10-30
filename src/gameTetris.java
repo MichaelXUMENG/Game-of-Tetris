@@ -16,6 +16,16 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 	static public Button quit, startgame; 
 	static public Label level, line, score, level_data, line_data, score_data;
 	
+	static int lineShowing=0,  //This is the variable of the number of total lines you have reached
+			scoreShowing=0,  // Total score you have got
+			levelShowing=1,  // The level you are in
+			scoringFactor=2,  //  variable for you to calculate your score: scoreShowing += levelShowing*scoringFactor*lineNum;
+			rowRequire=10,  // variable of line to level up!!
+			levelRow = 0,  // how many rows you have got in your current level
+			bonus = 3;  // the variable to give the bonus to more than one lines filled at one time: scoreShowing += levelShowing*scoringFactor*lineNum+(lineNum-1)*bonus
+	
+	static float speedFactor = (float) 0.2;
+	
 	static Frame outFrame = new Frame(); // a Frame to contain the mainarea
 		
 	//declare the variables used to calculate the coordinates
@@ -33,7 +43,8 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		
 	static int row, column; // variables of index of row and column for the starting cube of each object
 	static int shape; //used for deciding what shape of each object
-	static int fallingSpeed = 500;
+	static float fallingFactor = 1;
+	static float fallingSpeed = 1000/fallingFactor;
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -124,7 +135,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				while(round){
 					if(falling){
 						try {
-							Thread.sleep(fallingSpeed);
+							Thread.sleep((long) fallingSpeed);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -400,19 +411,19 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		//label 1 show the level of game
 		level = new Label("Level: ");
 		level.addMouseListener(this);
-		level_data = new Label("1");
+		level_data = new Label(Integer.toString(levelShowing));
 		level_data.addMouseListener(this);
 		
 		//label 2 shows the lines of game
 		line = new Label("Lines: ");
 		line.addMouseListener(this);
-		line_data = new Label("0");
+		line_data = new Label(Integer.toString(lineShowing));
 		line_data.addMouseListener(this);
 		
 		//label 3 shows the score of game
 		score = new Label("Score: ");
 		score.addMouseListener(this);
-		score_data = new Label("0");
+		score_data = new Label(Integer.toString(scoreShowing));
 		score_data.addMouseListener(this);
 		
 		//quit button
@@ -1440,6 +1451,24 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				stored[0][t] = false;
 			}			
 			
+		}
+		
+		if(lineNum >0){
+			lineShowing += lineNum;
+			levelRow += lineNum;
+			scoreShowing += levelShowing*scoringFactor*(lineNum+(lineNum-1)*bonus); // the more line you fill, the more score you will get one time
+			line_data.setText(Integer.toString(lineShowing));
+			score_data.setText(Integer.toString(scoreShowing));
+			
+			/*****************  level up!!! *************************************/
+			if(levelRow > rowRequire){ 
+				levelShowing++;
+				level_data.setText(Integer.toString(levelShowing));
+				levelRow -= rowRequire;
+				
+				fallingFactor = fallingFactor*(1+levelShowing*speedFactor);
+				fallingSpeed = 1000/fallingFactor;
+			}
 		}
 	}
 
