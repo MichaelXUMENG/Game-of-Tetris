@@ -7,17 +7,27 @@ import java.math.*;
 import javax.swing.JOptionPane;
 
 
-public class gameTetris extends Panel implements MouseMotionListener, ActionListener,MouseListener, MouseWheelListener{
+public class gameTetris extends Panel implements MouseMotionListener, ActionListener,MouseListener, MouseWheelListener, AdjustmentListener{
 
 	static int current, next;  // these two variables are used for store the shape of objects
 	static boolean start = true;  //decide whether the game is starting
 	static boolean round = false; //decide whether one object in terminated
 	static boolean falling = true;// decide whether the game is pause or not
 	static boolean active = true;
+	static boolean set = true;
+	
+	//used to determine the mouseMove
+	boolean change = false;
+	boolean inside = false;
+	
 	
 	//declare the button and labels
-	static public Button quit, startgame; 
+	static public Button quit, setting; 
+	static int buttonCounter =0;
 	static public Label level, line, score, level_data, line_data, score_data;
+	static public Label speed, speed_data;
+	static public Scrollbar speedBar, scoringBar, rowBar, realSpeed;
+
 	
 	static int lineShowing=0,  //This is the variable of the number of total lines you have reached
 			scoreShowing=0,  // Total score you have got
@@ -45,6 +55,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 	static drawElements dE = new drawElements( );
 		
 	static int row, column; // variables of index of row and column for the starting cube of each object
+	static int upperBound, lowerBound, leftBound, rightBound;
 	static int shape; //used for deciding what shape of each object
 	static float fallingFactor = 1;
 	static float fallingSpeed = 1000/fallingFactor;
@@ -168,11 +179,12 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				
 				if(active){
 					gT.repaint();
+					
 				}
 				round = true;
 				/************* Falling functions *******************************/
 				while(round && active){
-					if(falling && active){
+					if(falling && set && active){
 						try {
 							Thread.sleep((long) fallingSpeed);
 						} catch (InterruptedException e) {
@@ -182,7 +194,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 						
 						/********** Check if the shape hit the bottom and stop!! **************************/
 						
-						if(falling && active){
+						if(falling && set){
 							if(current == 0){ // left Z shape
 								if(shape == 0){
 									if((row == 19)||stored[row+1][column]||stored[row+1][column-1]||stored[row][column+1]){
@@ -437,6 +449,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 							
 							row++;
 							gT.repaint();
+							
 						}
 						
 					}
@@ -482,6 +495,9 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		level.addMouseListener(this);
 		level_data = new Label(Integer.toString(levelShowing));
 		level_data.addMouseListener(this);
+		rowBar = new Scrollbar(Scrollbar.HORIZONTAL, rowRequire, 1, 10, 51);
+		rowBar.setVisible(false);
+		rowBar.addAdjustmentListener(this);
 		
 		//label 2 shows the lines of game
 		line = new Label("Lines: ");
@@ -489,27 +505,48 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		line_data = new Label(Integer.toString(lineShowing));
 		line_data.addMouseListener(this);
 		
+		//Label and scroll bars about the speed
+		speed = new Label("Speed: ");
+		speed.setVisible(false);
+		speed_data = new Label(String.valueOf(fallingFactor));
+		speed_data.setVisible(false);
+		realSpeed = new Scrollbar(Scrollbar.HORIZONTAL, (int)fallingFactor*10, 1, 1, 101);
+		realSpeed.setVisible(false);
+		speedBar = new Scrollbar(Scrollbar.HORIZONTAL, (int)(speedFactor*10), 1, 1, 11);
+		speedBar.setVisible(false);
+		realSpeed.addAdjustmentListener(this);
+		speedBar.addAdjustmentListener(this);
+		
 		//label 3 shows the score of game
 		score = new Label("Score: ");
 		score.addMouseListener(this);
 		score_data = new Label(Integer.toString(scoreShowing));
 		score_data.addMouseListener(this);
+		scoringBar = new Scrollbar(Scrollbar.HORIZONTAL, scoringFactor, 1, 1, 11);
+		scoringBar.setVisible(false);
+		scoringBar.addAdjustmentListener(this);
 		
 		//quit button
 		quit = new Button("QUIT");
 		quit.addActionListener(this);
 		//start button
-		startgame = new Button("START");
-		startgame.addActionListener(this);
+		setting = new Button("SETTING");
+		setting.addActionListener(this);
 		
 		this.add(level);
 		this.add(level_data);
+		this.add(rowBar);
 		this.add(line);
 		this.add(line_data);
+		this.add(speedBar);
 		this.add(score);
 		this.add(score_data);
-		this.add(startgame);
+		this.add(scoringBar);
+		this.add(setting);
 		this.add(quit);
+		this.add(speed);
+		this.add(speed_data);
+		this.add(realSpeed);
 		
 		this.addMouseMotionListener(this);
 		this.addMouseListener(this);
@@ -543,18 +580,31 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		g.fillRect(PX, PY, SX , SY);
 		
 		//set the position of labels and button
-		SX = Math.round((width/2) / pixelSize);
+		SY=Math.round(height/pixelSize)/2;
+		SX = Math.round((width*2/5) / pixelSize);
 		level.setBounds(PX,iY(rHeight/2 - height - 10),SX , SY);
 		line.setBounds(PX,iY(rHeight/2 - 2*height - 10),SX , SY);
+		speed.setBounds(PX,iY(rHeight/2 - (height*12/5) - 10),SX , SY);
 		score.setBounds(PX,iY(rHeight/2 - 3*height - 10),SX , SY);
 		
+		SY=Math.round(height/pixelSize);
 		quit.setBounds(PX,iY(rHeight/2 - 5*height - 10),SX*2 , SY/2);
-		startgame.setBounds(PX,iY(rHeight/2 - 4*height - 10),SX*2 , SY/2);
+		setting.setBounds(PX,iY(rHeight/2 - 4*height - 10),SX*2 , SY/2);
 		
-		PX = iX(rWidth/5 + width/2);
+		PX = iX(rWidth/5 + width*3/7);
+		SX = Math.round((width/8) / pixelSize);
+		SY=Math.round(height/pixelSize)/2;
 		level_data.setBounds(PX,iY(rHeight/2 - height - 10),SX , SY);
 		line_data.setBounds(PX,iY(rHeight/2 - 2*height - 10),SX , SY);
+		speed_data.setBounds(PX,iY(rHeight/2 - (height*12/5) - 10),SX , SY);
 		score_data.setBounds(PX, iY(rHeight/2 - 3*height - 10), SX , SY);
+		
+		SX = Math.round((width/2) / pixelSize);
+		PX = iX(rWidth/5 + width*3/5);
+		rowBar.setBounds(PX,iY(rHeight/2 - height - 10),SX , SY);
+		speedBar.setBounds(PX,iY(rHeight/2 - 2*height - 10),SX , SY);
+		realSpeed.setBounds(PX,iY(rHeight/2 - (height*12/5) - 10),SX , SY);
+		scoringBar.setBounds(PX, iY(rHeight/2 - 3*height - 10), SX , SY);
 		
 		
 /**************************************************************************************************************
@@ -603,30 +653,37 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 			switch(current){
 			case 0:{//left Z shape
 				dE.drawLeftZShape(g, Es, sqPositionX[row][column], sqPositionY[row][column],shape);
+				getEdgeValues();
 				break;
 			}
 			case 1:{//Right Z shape
 				dE.drawRightZShape(g, Es, sqPositionX[row][column], sqPositionY[row][column],shape);
+				getEdgeValues();
 				break;
 			}
 			case 2:{//left L shape
 				dE.drawLeftLShape(g, Es, sqPositionX[row][column], sqPositionY[row][column],shape);
+				getEdgeValues();
 				break;
 			}
 			case 3:{//right L shape
 				dE.drawRightLShape(g, Es, sqPositionX[row][column], sqPositionY[row][column],shape);
+				getEdgeValues();
 				break;
 			}
 			case 4:{//cube
 				dE.drawCube(g, Es, sqPositionX[row][column], sqPositionY[row][column],shape);
+				getEdgeValues();
 				break;
 			}
 			case 5:{//Hill
 				dE.drawHillShape(g, Es, sqPositionX[row][column], sqPositionY[row][column],shape);
+				getEdgeValues();
 				break;
 			}
 			case 6:{//Line
 				dE.drawLine(g, Es, sqPositionX[row][column], sqPositionY[row][column],shape);
+				getEdgeValues();
 				break;
 			}
 			
@@ -666,6 +723,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 						}
 						
 					}
+					
 					break;
 				}
 				case 1:{// Right Z shape
@@ -687,6 +745,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 						}
 						
 					}
+					
 					break;
 				}
 				case 2:{//Left L shape
@@ -726,6 +785,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 						}
 						
 					}
+					
 					break;
 				}
 				case 3:{//Right L shape
@@ -765,6 +825,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 						}
 						
 					}
+					
 					break;
 				}
 				case 4:{//cube
@@ -814,6 +875,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 						}
 						
 					}
+					
 					break;
 				}
 				case 6:{//Line
@@ -835,6 +897,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 						}
 						
 					}
+					
 					break;
 				}
 				}
@@ -868,6 +931,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 						}
 						
 					}
+					
 					break;
 				}
 				case 1:{// Right Z shape
@@ -889,6 +953,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 						}
 						
 					}
+					
 					break;
 				}
 				case 2:{//Left L shape
@@ -927,6 +992,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 						}
 						
 					}
+					
 					break;
 				}
 				case 3:{//Right L shape
@@ -966,6 +1032,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 						}
 						
 					}
+					
 					break;
 				}
 				case 4:{//cube
@@ -1015,6 +1082,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 						}
 						
 					}
+					
 					break;
 				}
 				case 6:{//Line
@@ -1036,6 +1104,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 						}
 						
 					}
+					
 					break;
 				}
 				
@@ -1075,8 +1144,50 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		if(e.getSource() == quit){
 			System.exit(0);
 		}
-		else if(e.getSource() == startgame){
-			start = true;
+		
+		else if(e.getSource() == setting){
+			if(buttonCounter%2 == 0){
+				setting.setLabel("OK");
+				set = false;
+				
+				level.setText("Row Required:");
+				level_data.setText(String.valueOf(rowRequire));
+				rowBar.setVisible(true);
+				
+				line.setText("Speed Factor:");
+				line_data.setText(String.valueOf(speedFactor));
+				speedBar.setVisible(true);
+				
+				score.setText("Scoring Factor:");
+				score_data.setText(String.valueOf(scoringFactor));
+				scoringBar.setVisible(true);
+				
+				speed.setVisible(true);
+				speed_data.setVisible(true);
+				realSpeed.setVisible(true);
+				buttonCounter++;
+			}
+			else{
+				setting.setLabel("SETTING");
+				
+				level.setText("Level");
+				level_data.setText(String.valueOf(levelShowing));
+				rowBar.setVisible(false);
+				
+				line.setText("Lines");
+				line_data.setText(String.valueOf(lineShowing));
+				speedBar.setVisible(false);
+				
+				score.setText("Score");
+				score_data.setText(String.valueOf(scoreShowing));
+				scoringBar.setVisible(false);
+				
+				speed.setVisible(false);
+				speed_data.setVisible(false);
+				realSpeed.setVisible(false);
+				set = true;
+				buttonCounter++;
+			}
 		}
 	}
 
@@ -1090,7 +1201,6 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 	public void mouseMoved(MouseEvent e) {
 		// TODO Auto-generated method stub
 		int Mx, My;
-		boolean inside = false;
 		Mx = e.getX();
 		My = e.getY();
 		
@@ -1105,7 +1215,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				}
 			}
 			else{
-				if(!inside){
+				if(inside){
 					inside = false;
 					repaint();
 					falling = true;
@@ -1113,10 +1223,39 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 			}
 		}
 		else{
-			if(!inside){
+			if(inside){
 				inside = false;
 				repaint();
 				falling = true;
+			}
+		}
+		
+		
+		if(Mx>=leftBound && Mx<=rightBound){
+			if(My>=upperBound && My<=lowerBound){
+				if(!change){
+					change = true;
+					current = next;
+					shape =0;
+					next = new Random().nextInt(7);
+					repaint();
+					scoreShowing -= levelShowing*scoringFactor;
+					score_data.setText(String.valueOf(scoreShowing));
+				}
+				dE.drawString(g, Es, sqPositionX[7][2], sqPositionY[7][2], "PAUSE");
+
+			}
+			else{
+				if(change){
+					change = false;
+					dE.drawString(g, Es, sqPositionX[7][2], sqPositionY[7][2], "PAUSE");
+				}
+			}
+		}
+		else{
+			if(change){
+				change = false;
+				dE.drawString(g, Es, sqPositionX[7][2], sqPositionY[7][2], "PAUSE");
 			}
 		}
 		
@@ -1154,6 +1293,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 							}
 						}
 					}
+					
 					break;
 				}
 				
@@ -1175,6 +1315,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 							}
 						}
 					}
+					
 					break;
 				}
 				
@@ -1210,6 +1351,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 							}
 						}
 					}
+					
 					break;
 				}
 				
@@ -1245,11 +1387,13 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 							}
 						}
 					}
+					
 					break;
 				}
 				
 				/*********** Cube **********************/
 				case 4:{
+					
 					break;
 				}
 				
@@ -1285,6 +1429,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 							}
 						}
 					}
+					
 					break;
 				}
 				
@@ -1306,6 +1451,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 							}
 						}
 					}
+					
 					break;
 				}		
 				}
@@ -1337,6 +1483,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 							}
 						}
 					}
+					
 					break;
 				}
 				
@@ -1358,6 +1505,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 							}
 						}
 					}
+					
 					break;
 				}
 				
@@ -1393,6 +1541,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 							}
 						}
 					}
+					
 					break;
 				}
 				
@@ -1428,11 +1577,13 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 							}
 						}
 					}
+					
 					break;
 				}
 				
 				/*********** Cube **********************/
 				case 4:{
+					
 					break;
 				}
 				
@@ -1468,6 +1619,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 							}
 						}
 					}
+					
 					break;
 				}
 				
@@ -1489,6 +1641,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 							}
 						}
 					}
+					
 					break;
 				}		
 				}
@@ -1541,6 +1694,44 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 			}
 		}
 	}
+	
+	static void getEdgeValues(){
+		upperBound = dE.getUpEdge();
+		lowerBound = dE.getBottomEdge();
+		leftBound = dE.getLeftEdge();
+		rightBound = dE.getRightEdge();
+	}
+
+
+@Override
+public void adjustmentValueChanged(AdjustmentEvent e) {
+	// TODO Auto-generated method stub
+	if(e.getSource() == rowBar){
+		int val = rowBar.getValue();
+		level_data.setText(String.valueOf(val));
+		rowRequire = val;
+	}
+	
+	else if(e.getSource() == speedBar){
+		float val = (float)speedBar.getValue()/10;
+		line_data.setText(String.valueOf(val));
+		speedFactor = val;
+		
+	}
+	
+	else if(e.getSource() == scoringBar){
+		int val = scoringBar.getValue();
+		score_data.setText(String.valueOf(val));
+		scoringFactor = val;
+	}
+	
+	else if(e.getSource() == realSpeed){
+		float val = (float)realSpeed.getValue()/10;
+		speed_data.setText(String.valueOf((float)val));
+		fallingFactor = val;
+		fallingSpeed = 1000/fallingFactor;
+	}
+}
 
 }
 
@@ -1556,11 +1747,15 @@ class drawElements{
  * not the bottom of the main area!!!
 */
 	
-	int upBound, upEdge;
+	int upBound, upEdge, bottomEdge, leftEdge, rightEdge;
 	
 	void drawLine(Graphics g, int size, int Px, int Py, int index){
 		switch(index){
 		case 0: {
+			upEdge = Py;
+			bottomEdge = Py+size;
+			leftEdge = Px-size;
+			rightEdge = Px+3*size;
 			g.setColor(Color.black);
 			for(int i = 0; i<3; i++){
 				g.drawRect(Px+i*size, Py, size, size);
@@ -1579,6 +1774,10 @@ class drawElements{
 			break;
 		}
 		case 1:{
+			upEdge = Py-size;
+			bottomEdge = Py+3*size;
+			leftEdge = Px;
+			rightEdge = Px+size;
 			g.setColor(Color.black);
 			for(int i = 0; i<3; i++){
 				g.drawRect(Px, Py+i*size, size, size);
@@ -1602,6 +1801,10 @@ class drawElements{
 	}
 	
 	void drawCube(Graphics g, int size, int Px, int Py, int index){
+		upEdge = Py-size;
+		bottomEdge = Py+size;
+		leftEdge = Px;
+		rightEdge = Px+2*size;
 		g.setColor(Color.black);
 		for(int i = 0; i<2; i++){
 			for(int j = 0; j<2; j++)
@@ -1621,6 +1824,10 @@ class drawElements{
 	void drawRightLShape(Graphics g, int size, int Px, int Py, int index){
 		switch(index){
 		case 0:{
+			upEdge = Py-size;
+			bottomEdge = Py+size;
+			leftEdge = Px-size;
+			rightEdge = Px+2*size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px-size, Py, size, size);
@@ -1639,6 +1846,10 @@ class drawElements{
 			break;
 		}
 		case 1:{
+			upEdge = Py-size;
+			bottomEdge = Py+2*size;
+			leftEdge = Px;
+			rightEdge = Px+2*size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px, Py-size, size, size);
@@ -1653,6 +1864,10 @@ class drawElements{
 			break;
 		}
 		case 2:{
+			upEdge = Py;
+			bottomEdge = Py+2*size;
+			leftEdge = Px-size;
+			rightEdge = Px+2*size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px+size, Py, size, size);
@@ -1667,6 +1882,10 @@ class drawElements{
 			break;
 		}
 		case 3:{
+			upEdge = Py-size;
+			bottomEdge = Py+2*size;
+			leftEdge = Px-size;
+			rightEdge = Px+size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px, Py+size, size, size);
@@ -1688,6 +1907,10 @@ class drawElements{
 	void drawLeftLShape(Graphics g, int size, int Px, int Py, int index){
 		switch(index){
 		case 0:{
+			upEdge = Py-size;
+			bottomEdge = Py+size;
+			leftEdge = Px-size;
+			rightEdge = Px+2*size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px+size, Py, size, size);
@@ -1706,6 +1929,10 @@ class drawElements{
 			break;
 		}
 		case 1:{
+			upEdge = Py-size;
+			bottomEdge = Py+2*size;
+			leftEdge = Px;
+			rightEdge = Px+2*size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px, Py+size, size, size);
@@ -1720,6 +1947,10 @@ class drawElements{
 			break;
 		}
 		case 2:{
+			upEdge = Py;
+			bottomEdge = Py+2*size;
+			leftEdge = Px-size;
+			rightEdge = Px+2*size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px-size, Py, size, size);
@@ -1734,6 +1965,10 @@ class drawElements{
 			break;
 		}
 		case 3:{
+			upEdge = Py-size;
+			bottomEdge = Py+2*size;
+			leftEdge = Px-size;
+			rightEdge = Px+size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px, Py-size, size, size);
@@ -1755,6 +1990,10 @@ class drawElements{
 	void drawLeftZShape(Graphics g, int size, int Px, int Py, int index){
 		switch(index){
 		case 0:{
+			upEdge = Py-size;
+			bottomEdge = Py+size;
+			leftEdge = Px-size;
+			rightEdge = Px+2*size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px-size, Py, size, size);
@@ -1773,6 +2012,10 @@ class drawElements{
 			break;
 		}
 		case 1:{
+			upEdge = Py-size;
+			bottomEdge = Py+2*size;
+			leftEdge = Px-size;
+			rightEdge = Px+size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px, Py+size, size, size);
@@ -1793,6 +2036,10 @@ class drawElements{
 	void drawRightZShape(Graphics g, int size, int Px, int Py, int index){
 		switch(index){
 		case 0:{
+			upEdge = Py-size;
+			bottomEdge = Py+size;
+			leftEdge = Px-size;
+			rightEdge = Px+2*size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px+size, Py, size, size);
@@ -1811,6 +2058,10 @@ class drawElements{
 			break;
 		}
 		case 1:{
+			upEdge = Py-size;
+			bottomEdge = Py+2*size;
+			leftEdge = Px-size;
+			rightEdge = Px+size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px, Py-size, size, size);
@@ -1832,6 +2083,10 @@ class drawElements{
 	void drawHillShape(Graphics g, int size, int Px, int Py, int index){
 		switch(index){
 		case 0:{
+			upEdge = Py-size;
+			bottomEdge = Py+size;
+			leftEdge = Px-size;
+			rightEdge = Px+2*size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px +size, Py, size, size);
@@ -1850,6 +2105,10 @@ class drawElements{
 			break;
 		}
 		case 1:{
+			upEdge = Py-size;
+			bottomEdge = Py+2*size;
+			leftEdge = Px;
+			rightEdge = Px+2*size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px, Py-size, size, size);
@@ -1864,6 +2123,10 @@ class drawElements{
 			break;
 		}
 		case 2:{
+			upEdge = Py;
+			bottomEdge = Py+2*size;
+			leftEdge = Px-size;
+			rightEdge = Px+2*size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px +size, Py, size, size);
@@ -1878,6 +2141,10 @@ class drawElements{
 			break;
 		}
 		case 3:{
+			upEdge = Py-size;
+			bottomEdge = Py+2*size;
+			leftEdge = Px-size;
+			rightEdge = Px+size;
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px, Py-size, size, size);
@@ -1928,16 +2195,21 @@ class drawElements{
 		g.drawString(s, Px, Py+size*2);
 	}
 	
-	void clearSring(Graphics g, int Px, int Py, String s){
-		g.setColor(Color.white);
-		g.drawRect(Px, Py, 215, 65);
-		g.setFont(new Font("Times New Romen", Font.BOLD, 60));
-		g.drawString(s, Px+10, Py+55);
-		
-	}
 	
 	void setBound(int bound){
 		this.upBound = bound;
 	}
 	
+	int getUpEdge(){
+		return this.upEdge;
+	}
+	int getBottomEdge(){
+		return this.bottomEdge;
+	}
+	int getLeftEdge(){
+		return this.leftEdge;
+	}
+	int getRightEdge(){
+		return this.rightEdge;
+	}
 } 
