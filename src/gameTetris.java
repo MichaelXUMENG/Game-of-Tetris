@@ -4,6 +4,8 @@ import java.awt.geom.Point2D;
 import java.util.*;
 import java.math.*;
 
+import javax.swing.JOptionPane;
+
 
 public class gameTetris extends Panel implements MouseMotionListener, ActionListener,MouseListener, MouseWheelListener{
 
@@ -11,6 +13,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 	static boolean start = true;  //decide whether the game is starting
 	static boolean round = false; //decide whether one object in terminated
 	static boolean falling = true;// decide whether the game is pause or not
+	static boolean active = true;
 	
 	//declare the button and labels
 	static public Button quit, startgame; 
@@ -86,54 +89,90 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		
 		/************* Function of falling ***********************/
 		while(true){
-			while(start){ // Start to fall
+			while(start && active){ // Start to fall
 				current = next;
 				next = new Random().nextInt(7);
 				shape = 0;
 				/*********** Customerize the start point of each shape *************************/
 				switch(current){
 				case 0:{//left Z shape
-					row = 1;
+					row = 0;
 					column = 4;
+					if(stored[row][column]||stored[row][column-1]){
+						active = false;
+						JOptionPane.showMessageDialog(null, "GAME OVER!!!", "Game Over!!!", JOptionPane.ERROR_MESSAGE);
+					}
 					break;
 				}
 				case 1:{//right Z shape
-					row = 1;
+					row = 0;
 					column = 5;
+					
+					if(stored[row][column]||stored[row][column+1]){
+						active = false;
+						JOptionPane.showMessageDialog(null, "GAME OVER!!!", "Game Over!!!", JOptionPane.ERROR_MESSAGE);
+					}
 					break;
 				}
 				case 2:{//left L shape
-					row = 1;
+					row = 0;
 					column = 4;
+					
+					if(stored[row][column]||stored[row][column+1]||stored[row][column-1]){
+						active = false;
+						JOptionPane.showMessageDialog(null, "GAME OVER!!!", "Game Over!!!", JOptionPane.ERROR_MESSAGE);
+					}
 					break;
 				}
 				case 3:{//right L shape
-					row = 1;
+					row = 0;
 					column = 5;
+					
+					if(stored[row][column]||stored[row][column-1]||stored[row][column+1]){
+						active = false;
+						JOptionPane.showMessageDialog(null, "GAME OVER!!!", "Game Over!!!", JOptionPane.ERROR_MESSAGE);
+					}
 					break;
 				}
 				case 4:{//cube
-					row = 1;
+					row = 0;
 					column = 4;
+					
+					if(stored[row][column]||stored[row][column+1]){
+						active = false;
+						JOptionPane.showMessageDialog(null, "GAME OVER!!!", "Game Over!!!", JOptionPane.ERROR_MESSAGE);
+					}
 					break;
 				}
 				case 5:{//Hill
-					row = 1;
+					row = 0;
 					column = 4;
+					
+					if(stored[row][column]||stored[row][column+1]||stored[row][column-1]){
+						active = false;
+						JOptionPane.showMessageDialog(null, "GAME OVER!!!", "Game Over!!!", JOptionPane.ERROR_MESSAGE);
+					}
 					break;
 				}
 				case 6:{//Line
 					row = 0;
-					column = 3;
+					column = 4;
+					
+					if(stored[row][column]||stored[row][column-1]||stored[row][column+1]||stored[row][column+2]){
+						active = false;
+						JOptionPane.showMessageDialog(null, "GAME OVER!!!", "Game Over!!!", JOptionPane.ERROR_MESSAGE);
+					}
 					break;
 				}
 				}
 				
-				gT.repaint();
+				if(active){
+					gT.repaint();
+				}
 				round = true;
 				/************* Falling functions *******************************/
-				while(round){
-					if(falling){
+				while(round && active){
+					if(falling && active){
 						try {
 							Thread.sleep((long) fallingSpeed);
 						} catch (InterruptedException e) {
@@ -143,10 +182,15 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 						
 						/********** Check if the shape hit the bottom and stop!! **************************/
 						
-						if(falling){
+						if(falling && active){
 							if(current == 0){ // left Z shape
 								if(shape == 0){
 									if((row == 19)||stored[row+1][column]||stored[row+1][column-1]||stored[row][column+1]){
+										if(row == 0){
+											active = false;
+											JOptionPane.showMessageDialog(null, "GAME OVER!!!", "Game Over!!!", JOptionPane.ERROR_MESSAGE);
+											break;
+										}
 										stored[row][column] = true;
 										stored[row][column-1] = true;
 										stored[row-1][column] = true;
@@ -171,6 +215,11 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 							else if (current == 1){// Right Z shape
 								if(shape == 0){
 									if((row == 19)||stored[row+1][column]||stored[row+1][column+1]||stored[row][column-1]){
+										if(row == 0){
+											active = false;
+											JOptionPane.showMessageDialog(null, "GAME OVER!!!", "Game Over!!!", JOptionPane.ERROR_MESSAGE);
+											break;
+										}
 										stored[row][column] = true;
 										stored[row][column+1] = true;
 										stored[row-1][column] = true;
@@ -195,6 +244,11 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 							else if (current == 2){// Left L shape
 								if(shape == 0){
 									if((row == 19)||stored[row+1][column] || stored[row+1][column-1] || stored[row+1][column+1]){
+										if(row == 0){
+											active = false;
+											JOptionPane.showMessageDialog(null, "GAME OVER!!!", "Game Over!!!", JOptionPane.ERROR_MESSAGE);
+											break;
+										}
 										stored[row][column]=true;
 										stored[row][column+1]=true;
 										stored[row][column-1]=true;
@@ -241,6 +295,11 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 							else if (current == 3){// Right L shape
 								if(shape == 0){
 									if((row == 19)||stored[row+1][column]  || stored[row+1][column-1]  || stored[row+1][column+1] ){
+										if(row == 0){
+											active = false;
+											JOptionPane.showMessageDialog(null, "GAME OVER!!!", "Game Over!!!", JOptionPane.ERROR_MESSAGE);
+											break;
+										}
 										stored[row][column]=true;
 										stored[row][column+1]=true;
 										stored[row][column-1]=true;
@@ -286,6 +345,11 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 							}
 							else if (current == 4){// cube
 								if((row == 19)||stored[row+1][column] || stored[row+1][column+1]){
+									if(row == 0){
+										active = false;
+										JOptionPane.showMessageDialog(null, "GAME OVER!!!", "Game Over!!!", JOptionPane.ERROR_MESSAGE);
+										break;
+									}
 									stored[row][column] = true;
 									stored[row][column+1] = true;
 									stored[row-1][column] = true;
@@ -298,6 +362,11 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 							else if (current == 5){// Hill
 								if(shape == 0){
 									if((row == 19)||stored[row+1][column] || stored[row+1][column-1] || stored[row+1][column+1]){
+										if(row == 0){
+											active = false;
+											JOptionPane.showMessageDialog(null, "GAME OVER!!!", "Game Over!!!", JOptionPane.ERROR_MESSAGE);
+											break;
+										}
 										stored[row][column]=true;
 										stored[row][column+1]=true;
 										stored[row][column-1]=true;
@@ -464,6 +533,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				sqPositionY[i][j] = PY + i*Es;
 			}
 		}
+		dE.setBound(sqPositionY[0][0]);
 		
 		//create the small area
 		width = rWidth*2/5; height = width/2;
@@ -1486,6 +1556,8 @@ class drawElements{
  * not the bottom of the main area!!!
 */
 	
+	int upBound, upEdge;
+	
 	void drawLine(Graphics g, int size, int Px, int Py, int index){
 		switch(index){
 		case 0: {
@@ -1509,17 +1581,17 @@ class drawElements{
 		case 1:{
 			g.setColor(Color.black);
 			for(int i = 0; i<3; i++){
-				g.drawRect(Px, Py-i*size, size, size);
+				g.drawRect(Px, Py+i*size, size, size);
 				if(i == 1){
-					g.drawRect(Px, Py+size, size, size);
+					g.drawRect(Px, Py-size, size, size);
 				}
 			}
 			
 			g.setColor(Color.red);
 			for(int i = 0; i<3; i++){
-				g.fillRect(Px+1, Py-i*size+1, size-1, size-1);
+				g.fillRect(Px+1, Py+i*size+1, size-1, size-1);
 				if(i == 1){
-					g.fillRect(Px+1, Py+size+1, size-1, size-1);
+					g.fillRect(Px+1, Py-size+1, size-1, size-1);
 				}
 			}
 			break;
@@ -1533,12 +1605,16 @@ class drawElements{
 		g.setColor(Color.black);
 		for(int i = 0; i<2; i++){
 			for(int j = 0; j<2; j++)
-				g.drawRect(Px+j*size, Py-i*size, size, size);
+				if((Py-i*size)>=upBound){
+					g.drawRect(Px+j*size, Py-i*size, size, size);
+				}
 		}
 		g.setColor(Color.green);
 		for(int i = 0; i<2; i++){
 			for(int j = 0; j<2; j++)
-				g.fillRect(Px+j*size+1, Py-i*size+1, size-1, size-1);
+				if((Py-i*size)>=upBound){
+					g.fillRect(Px+j*size+1, Py-i*size+1, size-1, size-1);
+				}
 		}
 	}
 	
@@ -1549,13 +1625,17 @@ class drawElements{
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px-size, Py, size, size);
 			g.drawRect(Px+size, Py, size, size);
-			g.drawRect(Px+size, Py-size, size, size);
+			if((Py-size)>=upBound){
+				g.drawRect(Px+size, Py-size, size, size);
+			}
 			
 			g.setColor(Color.blue);
 			g.fillRect(Px+1, Py+1, size-1, size-1);
 			g.fillRect(Px-size+1, Py+1, size-1, size-1);
 			g.fillRect(Px+size+1, Py+1, size-1, size-1);
-			g.fillRect(Px+size+1, Py-size+1, size-1, size-1);
+			if((Py-size)>=upBound){
+				g.fillRect(Px+size+1, Py-size+1, size-1, size-1);
+			}
 			break;
 		}
 		case 1:{
@@ -1612,13 +1692,17 @@ class drawElements{
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px+size, Py, size, size);
 			g.drawRect(Px-size, Py, size, size);
-			g.drawRect(Px-size, Py-size, size, size);
+			if((Py-size)>=upBound){
+				g.drawRect(Px-size, Py-size, size, size);
+			}
 			
 			g.setColor(Color.gray);
 			g.fillRect(Px+1, Py+1, size-1, size-1);
 			g.fillRect(Px+size+1, Py+1, size-1, size-1);
 			g.fillRect(Px-size+1, Py+1, size-1, size-1);
-			g.fillRect(Px-size+1, Py-size+1, size-1, size-1);
+			if((Py-size)>=upBound){
+				g.fillRect(Px-size+1, Py-size+1, size-1, size-1);
+			}
 			break;
 		}
 		case 1:{
@@ -1674,14 +1758,18 @@ class drawElements{
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px-size, Py, size, size);
-			g.drawRect(Px, Py-size, size, size);
-			g.drawRect(Px+size, Py-size, size, size);
+			if((Py-size)>=upBound){
+				g.drawRect(Px, Py-size, size, size);
+				g.drawRect(Px+size, Py-size, size, size);
+			}
 			
 			g.setColor(Color.yellow);
 			g.fillRect(Px+1, Py+1, size-1, size-1);
 			g.fillRect(Px-size+1, Py+1, size-1, size-1);
-			g.fillRect(Px+1, Py-size+1, size-1, size-1);
-			g.fillRect(Px+size+1, Py-size+1, size-1, size-1);
+			if((Py-size)>=upBound){
+				g.fillRect(Px+1, Py-size+1, size-1, size-1);
+				g.fillRect(Px+size+1, Py-size+1, size-1, size-1);
+			}
 			break;
 		}
 		case 1:{
@@ -1708,14 +1796,18 @@ class drawElements{
 			g.setColor(Color.black);
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px+size, Py, size, size);
-			g.drawRect(Px, Py-size, size, size);
-			g.drawRect(Px-size, Py-size, size, size);
+			if((Py-size)>=upBound){
+				g.drawRect(Px, Py-size, size, size);
+				g.drawRect(Px-size, Py-size, size, size);
+			}
 			
 			g.setColor(Color.orange);
 			g.fillRect(Px+1, Py+1, size-1, size-1);
 			g.fillRect(Px+size+1, Py+1, size-1, size-1);
-			g.fillRect(Px+1, Py-size+1, size-1, size-1);
-			g.fillRect(Px-size+1, Py-size+1, size-1, size-1);
+			if((Py-size)>=upBound){
+				g.fillRect(Px+1, Py-size+1, size-1, size-1);
+				g.fillRect(Px-size+1, Py-size+1, size-1, size-1);
+			}
 			break;
 		}
 		case 1:{
@@ -1744,13 +1836,17 @@ class drawElements{
 			g.drawRect(Px, Py, size, size);
 			g.drawRect(Px +size, Py, size, size);
 			g.drawRect(Px -size, Py, size, size);
-			g.drawRect(Px, Py - size, size, size);
+			if((Py-size)>=upBound){
+				g.drawRect(Px, Py - size, size, size);
+			}
 			
 			g.setColor(Color.pink);
 			g.fillRect(Px +1, Py+1, size-1, size-1);
 			g.fillRect(Px + size +1, Py+1, size-1, size-1);
 			g.fillRect(Px -size +1, Py+1, size-1, size-1);
-			g.fillRect(Px +1, Py- size +1, size-1, size-1);
+			if((Py-size)>=upBound){
+				g.fillRect(Px +1, Py- size +1, size-1, size-1);
+			}
 			break;
 		}
 		case 1:{
@@ -1838,6 +1934,10 @@ class drawElements{
 		g.setFont(new Font("Times New Romen", Font.BOLD, 60));
 		g.drawString(s, Px+10, Py+55);
 		
+	}
+	
+	void setBound(int bound){
+		this.upBound = bound;
 	}
 	
 } 
