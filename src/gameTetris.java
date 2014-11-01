@@ -27,7 +27,10 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 	static public Label level, line, score, level_data, line_data, score_data;
 	static public Label speed, speed_data;
 	static public Scrollbar speedBar, scoringBar, rowBar, realSpeed;
-
+	static public Label xNum, yNum;
+	static public Scrollbar xModify, yModify;
+	static public int xaxis = 10,
+			yaxis = 20;
 	
 	static int lineShowing=0,  //This is the variable of the number of total lines you have reached
 			scoreShowing=0,  // Total score you have got
@@ -526,6 +529,17 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		scoringBar.setVisible(false);
 		scoringBar.addAdjustmentListener(this);
 		
+		xNum = new Label("x: "+String.valueOf(xaxis));
+		yNum = new Label("y: "+String.valueOf(yaxis));
+		xModify = new Scrollbar(Scrollbar.HORIZONTAL, xaxis, 1, 5, 31);
+		yModify = new Scrollbar(Scrollbar.HORIZONTAL, yaxis, 1, 5, 61);
+		xNum.setVisible(false);
+		yNum.setVisible(false);
+		xModify.setVisible(false);
+		yModify.setVisible(false);
+		xModify.addAdjustmentListener(this);
+		yModify.addAdjustmentListener(this);
+		
 		//quit button
 		quit = new Button("QUIT");
 		quit.addActionListener(this);
@@ -547,6 +561,10 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		this.add(speed);
 		this.add(speed_data);
 		this.add(realSpeed);
+		this.add(xNum);
+		this.add(yNum);
+		this.add(xModify);
+		this.add(yModify);
 		
 		this.addMouseMotionListener(this);
 		this.addMouseListener(this);
@@ -579,13 +597,23 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		g.setColor(Color.white);
 		g.fillRect(PX, PY, SX , SY);
 		
+		
+		
 		//set the position of labels and button
 		SY=Math.round(height/pixelSize)/2;
+		
+		xNum.setBounds(PX, iY(rHeight/2 - (height*3) - 10),SX/6 , SY);//label of x
+		yNum.setBounds(PX + SX*5/8, iY(rHeight/2 - (height*3) - 10),SX/6 , SY); // label of y
+		xModify.setBounds(PX + SX*11/48, iY(rHeight/2 - (height*3) - 10),SX/3 , SY);  //Scroll bar of x
+		yModify.setBounds(PX + SX*41/48, iY(rHeight/2 - (height*3) - 10),SX/3 , SY);  // scroll bar of y
+		
+		
 		SX = Math.round((width*2/5) / pixelSize);
 		level.setBounds(PX,iY(rHeight/2 - height - 10),SX , SY);
-		line.setBounds(PX,iY(rHeight/2 - 2*height - 10),SX , SY);
-		speed.setBounds(PX,iY(rHeight/2 - (height*12/5) - 10),SX , SY);
-		score.setBounds(PX,iY(rHeight/2 - 3*height - 10),SX , SY);
+		line.setBounds(PX,iY(rHeight/2 - height*3/2 - 10),SX , SY);
+		speed.setBounds(PX,iY(rHeight/2 - (height*2) - 10),SX , SY);
+		score.setBounds(PX,iY(rHeight/2 - (height*12/5) - 10),SX , SY);
+		
 		
 		SY=Math.round(height/pixelSize);
 		quit.setBounds(PX,iY(rHeight/2 - 5*height - 10),SX*2 , SY/2);
@@ -595,16 +623,18 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		SX = Math.round((width/8) / pixelSize);
 		SY=Math.round(height/pixelSize)/2;
 		level_data.setBounds(PX,iY(rHeight/2 - height - 10),SX , SY);
-		line_data.setBounds(PX,iY(rHeight/2 - 2*height - 10),SX , SY);
-		speed_data.setBounds(PX,iY(rHeight/2 - (height*12/5) - 10),SX , SY);
-		score_data.setBounds(PX, iY(rHeight/2 - 3*height - 10), SX , SY);
+		line_data.setBounds(PX,iY(rHeight/2 - height*3/2 - 10),SX , SY);
+		speed_data.setBounds(PX,iY(rHeight/2 - (height*2) - 10),SX , SY);
+		score_data.setBounds(PX, iY(rHeight/2 - (height*12/5) - 10), SX , SY);
 		
 		SX = Math.round((width/2) / pixelSize);
 		PX = iX(rWidth/5 + width*3/5);
 		rowBar.setBounds(PX,iY(rHeight/2 - height - 10),SX , SY);
-		speedBar.setBounds(PX,iY(rHeight/2 - 2*height - 10),SX , SY);
-		realSpeed.setBounds(PX,iY(rHeight/2 - (height*12/5) - 10),SX , SY);
-		scoringBar.setBounds(PX, iY(rHeight/2 - 3*height - 10), SX , SY);
+		speedBar.setBounds(PX,iY(rHeight/2 - height*3/2 - 10),SX , SY);
+		realSpeed.setBounds(PX,iY(rHeight/2 - (height*2) - 10),SX , SY);
+		scoringBar.setBounds(PX, iY(rHeight/2 - (height*12/5) - 10), SX , SY);
+		
+		
 		
 		
 /**************************************************************************************************************
@@ -702,7 +732,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
  * Left Click
  * ****************************************************************************************************/
 		if(e.getButton() == e.BUTTON1){
-			if(falling){
+			if(falling && set){
 				switch(current){
 				case 0:{// Left Z shape
 					if(shape == 0){
@@ -910,7 +940,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
  * ********************************************************************************************************/
 		
 		else if(e.getButton() == e.BUTTON3){
-			if(falling){
+			if(falling && set){
 				switch(current){
 				case 0:{// Left Z shape
 					if(shape == 0){
@@ -1165,6 +1195,11 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				speed.setVisible(true);
 				speed_data.setVisible(true);
 				realSpeed.setVisible(true);
+				
+				xNum.setVisible(true);
+				yNum.setVisible(true);
+				xModify.setVisible(true);
+				yModify.setVisible(true);
 				buttonCounter++;
 			}
 			else{
@@ -1185,6 +1220,11 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 				speed.setVisible(false);
 				speed_data.setVisible(false);
 				realSpeed.setVisible(false);
+				
+				xNum.setVisible(false);
+				yNum.setVisible(false);
+				xModify.setVisible(false);
+				yModify.setVisible(false);
 				set = true;
 				buttonCounter++;
 			}
@@ -1272,7 +1312,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		 * rotate counter clockwise
 		 * *************************************/
 		if(e.getWheelRotation() == 1){
-			if(falling){
+			if(falling && set){
 				switch(current){
 				
 				/************* Left Z shape*******************************/
@@ -1462,7 +1502,7 @@ public class gameTetris extends Panel implements MouseMotionListener, ActionList
 		 * rotate clockwise
 		 * *****************/
 		else if(e.getWheelRotation() == -1){
-			if(falling){
+			if(falling && set){
 				switch(current){
 				
 				/************* Left Z shape*******************************/
@@ -1730,6 +1770,18 @@ public void adjustmentValueChanged(AdjustmentEvent e) {
 		speed_data.setText(String.valueOf((float)val));
 		fallingFactor = val;
 		fallingSpeed = 1000/fallingFactor;
+	}
+	
+	else if(e.getSource() == xModify){
+		int val = xModify.getValue();
+		xNum.setText("x: "+String.valueOf(val));
+		xaxis = val;
+	}
+	
+	else if(e.getSource() == yModify){
+		int val = yModify.getValue();
+		yNum.setText("y: "+String.valueOf(val));
+		yaxis = val;
 	}
 }
 
